@@ -1,0 +1,127 @@
+// Data model
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// The grouping a project belongs to, shown as a badge above its title.
+model Platform {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  slug     String    @unique
+  order    Int       @default(0)
+  projects Project[]
+
+  @@index([order])
+}
+
+/// The primary subject area used by the category filter.
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  slug     String    @unique
+  order    Int       @default(0)
+  projects Project[]
+
+  @@index([order])
+}
+
+/// Free-form descriptor chips shown on each card.
+model Tag {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  slug     String    @unique
+  projects Project[]
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  url         String
+  displayUrl  String
+  description String
+  icon        String   @default("Box")
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  platformId Int
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Restrict)
+  tags       Tag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, featured, order])
+  @@index([categoryId])
+  @@index([platformId])
+}
+
+enum LinkKind {
+  NEWSLETTER
+  FOOTER
+  SOCIAL
+}
+
+/// Newsletter cards, footer links, and social links.
+model LinkCard {
+  id          Int      @id @default(autoincrement())
+  kind        LinkKind
+  label       String
+  title       String
+  description String   @default("")
+  url         String
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kind, order])
+}
+
+/// Single-row table (id is pinned to 1) holding editable site copy.
+model SiteSetting {
+  id Int @id @default(1)
+
+  siteTitle String @default("Portfolio")
+  ownerName String @default("")
+  tagline   String @default("")
+
+  heroEyebrow   String @default("")
+  heroHeadline  String @default("")
+  heroIntro     String @default("")
+  heroCtaLabel  String @default("Explore projects")
+  heroCtaUrl    String @default("#projects")
+  heroAltLabel  String @default("Connect on LinkedIn")
+  heroAltUrl    String @default("")
+
+  // A null value means "count it from the database instead".
+  statLabel1 String  @default("Projects")
+  statValue1 String?
+  statLabel2 String  @default("Collections")
+  statValue2 String?
+  statLabel3 String  @default("Hosting platforms")
+  statValue3 String?
+
+  libraryHeading String @default("Project Library")
+
+  newsletterEyebrow  String @default("")
+  newsletterHeading  String @default("")
+  newsletterIntro    String @default("")
+  newsletterCtaLabel String @default("")
+  newsletterCtaUrl   String @default("")
+
+  footerNote String @default("")
+
+  updatedAt DateTime @updatedAt
+}

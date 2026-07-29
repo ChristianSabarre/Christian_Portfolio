@@ -1,0 +1,332 @@
+@import "tailwindcss";
+
+/* Theme is driven by a data attribute so the toggle can switch it at runtime
+   without a reload. Dark is the default. */
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
+:root,
+[data-theme="dark"] {
+  --bg: oklch(0.145 0.018 268);
+  --bg-deep: oklch(0.108 0.016 268);
+  --bg-raised: oklch(0.195 0.019 268);
+  --surface: oklch(0.205 0.02 268 / 0.72);
+  --surface-solid: oklch(0.2 0.02 268);
+  --surface-hover: oklch(0.245 0.024 268 / 0.85);
+
+  --text: oklch(0.97 0.006 268);
+  --text-muted: oklch(0.72 0.021 268);
+  --text-faint: oklch(0.58 0.021 268);
+
+  --border: oklch(0.99 0.01 268 / 0.1);
+  --border-strong: oklch(0.99 0.01 268 / 0.18);
+
+  --accent: oklch(0.68 0.185 278);
+  --accent-soft: oklch(0.68 0.185 278 / 0.16);
+  --accent-2: oklch(0.8 0.135 205);
+  --gold: oklch(0.83 0.15 82);
+  --gold-soft: oklch(0.83 0.15 82 / 0.16);
+
+  --ring: oklch(0.68 0.185 278 / 0.55);
+  --shadow-color: 268 40% 3%;
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: oklch(0.985 0.004 268);
+  --bg-deep: oklch(0.955 0.007 268);
+  --bg-raised: oklch(1 0 0);
+  --surface: oklch(1 0 0 / 0.82);
+  --surface-solid: oklch(1 0 0);
+  --surface-hover: oklch(1 0 0 / 0.95);
+
+  --text: oklch(0.22 0.024 268);
+  --text-muted: oklch(0.47 0.026 268);
+  --text-faint: oklch(0.58 0.024 268);
+
+  --border: oklch(0.3 0.03 268 / 0.13);
+  --border-strong: oklch(0.3 0.03 268 / 0.22);
+
+  --accent: oklch(0.53 0.21 278);
+  --accent-soft: oklch(0.53 0.21 278 / 0.11);
+  --accent-2: oklch(0.6 0.13 205);
+  --gold: oklch(0.62 0.14 62);
+  --gold-soft: oklch(0.62 0.14 62 / 0.13);
+
+  --ring: oklch(0.53 0.21 278 / 0.45);
+  --shadow-color: 268 30% 45%;
+
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-deep: var(--bg-deep);
+  --color-bg-raised: var(--bg-raised);
+  --color-surface: var(--surface);
+  --color-surface-solid: var(--surface-solid);
+  --color-surface-hover: var(--surface-hover);
+
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-2: var(--accent-2);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-card: 1.15rem;
+
+  --animate-fade-up: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-drift: drift 22s ease-in-out infinite alternate;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-3%, -2%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4%, 3%, 0) scale(1.12);
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* The sticky filter bar would otherwise cover anchored sections. */
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: white;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-deep);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--text-faint) 40%, transparent);
+    border-radius: 99px;
+    border: 3px solid var(--bg-deep);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--accent) 70%, transparent);
+  }
+}
+
+@layer components {
+  /* Small-caps label used for platform badges and section eyebrows. */
+  .eyebrow {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Frosted panel with a hairline gradient edge. */
+  .glass {
+    background: var(--surface);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid var(--border);
+  }
+
+  /* Accent glow that follows the pointer; --mx/--my are set by ProjectCard. */
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--accent) 22%, transparent),
+      transparent 68%
+    );
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  .gradient-text {
+    background: linear-gradient(
+      100deg,
+      var(--text) 8%,
+      color-mix(in oklab, var(--accent) 78%, var(--text)) 48%,
+      color-mix(in oklab, var(--accent-2) 76%, var(--text)) 88%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.7rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 550;
+    line-height: 1;
+    transition:
+      transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      color 0.18s ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: linear-gradient(
+      135deg,
+      var(--accent),
+      color-mix(in oklab, var(--accent-2) 55%, var(--accent))
+    );
+    color: white;
+    box-shadow: 0 6px 22px -8px color-mix(in oklab, var(--accent) 85%, transparent);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 10px 30px -8px color-mix(in oklab, var(--accent) 95%, transparent);
+    filter: brightness(1.07);
+  }
+
+  .btn-ghost {
+    background: color-mix(in oklab, var(--text) 5%, transparent);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    background: color-mix(in oklab, var(--text) 9%, transparent);
+    border-color: var(--border-strong);
+  }
+
+  .btn-danger {
+    background: color-mix(in oklab, oklch(0.6 0.2 25) 14%, transparent);
+    color: oklch(0.72 0.19 25);
+    border: 1px solid color-mix(in oklab, oklch(0.6 0.2 25) 32%, transparent);
+  }
+  .btn-danger:hover {
+    background: color-mix(in oklab, oklch(0.6 0.2 25) 22%, transparent);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: color-mix(in oklab, var(--text) 4%, transparent);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .field {
+    width: 100%;
+    border-radius: 0.7rem;
+    border: 1px solid var(--border);
+    background: color-mix(in oklab, var(--bg-deep) 70%, transparent);
+    padding: 0.6rem 0.85rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  .field::placeholder {
+    color: var(--text-faint);
+  }
+  .field:focus {
+    outline: none;
+    border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+}
+
+/* Honour the OS setting: kill transforms/animations, keep opacity legible. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

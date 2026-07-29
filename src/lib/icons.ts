@@ -1,0 +1,95 @@
+import {
+  Activity,
+  Atom,
+  BarChart3,
+  Binary,
+  BookOpen,
+  Bot,
+  Box,
+  Boxes,
+  Brain,
+  Calculator,
+  Cloud,
+  Code2,
+  Compass,
+  Cpu,
+  Database,
+  FlaskConical,
+  Gamepad2,
+  Globe,
+  GraduationCap,
+  Layers,
+  LineChart,
+  Lock,
+  Network,
+  Package,
+  Puzzle,
+  Radar,
+  Rocket,
+  Server,
+  Shapes,
+  ShieldCheck,
+  Sigma,
+  Smartphone,
+  Sparkles,
+  Terminal,
+  Truck,
+  Waves,
+  Workflow,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+
+/**
+ * Whitelist of icons selectable in the admin panel. Values coming from the
+ * database are looked up here, so a stale or hand-edited name degrades to a
+ * neutral box rather than crashing the render.
+ */
+export const ICONS = {
+  Activity,
+  Atom,
+  BarChart3,
+  Binary,
+  BookOpen,
+  Bot,
+  Box,
+  Boxes,
+  Brain,
+  Calculator,
+  Cloud,
+  Code2,
+  Compass,
+  Cpu,
+  Database,
+  FlaskConical,
+  Gamepad2,
+  Globe,
+  GraduationCap,
+  Layers,
+  LineChart,
+  Lock,
+  Network,
+  Package,
+  Puzzle,
+  Radar,
+  Rocket,
+  Server,
+  Shapes,
+  ShieldCheck,
+  Sigma,
+  Smartphone,
+  Sparkles,
+  Terminal,
+  Truck,
+  Waves,
+  Workflow,
+  Zap,
+} satisfies Record<string, LucideIcon>;
+
+export type IconName = keyof typeof ICONS;
+
+export const ICON_NAMES = Object.keys(ICONS) as IconName[];
+
+export function getIcon(name: string | null | undefined): LucideIcon {
+  return ICONS[name as IconName] ?? Box;
+}
