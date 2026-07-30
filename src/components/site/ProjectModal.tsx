@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { ArrowUpRight, Check, Link2, X } from "lucide-react";
+import { ArrowUpRight, Check, Link as LinkIcon, Link2, X } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
+import UpvoteButton from "./UpvoteButton";
 import type { PublicProject } from "@/lib/queries";
 
 export default function ProjectModal({
@@ -158,20 +159,26 @@ export default function ProjectModal({
             ))}
           </div>
 
-          <div className="rounded-xl border border-line bg-bg-deep/60 p-4">
-            <p className="eyebrow mb-1.5 text-faint">Project address</p>
+          <p className="flex items-start gap-2 text-sm">
+            <LinkIcon className="mt-0.5 size-4 shrink-0 text-faint" />
             <a
               href={project.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="break-all font-mono text-sm text-accent hover:underline"
+              className="break-all font-mono text-accent hover:underline"
             >
               {project.displayUrl || project.url}
             </a>
-          </div>
+          </p>
         </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-line p-6 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-2 border-t border-line p-6 sm:flex-row sm:items-center">
+          <UpvoteButton
+            projectId={project.id}
+            votes={project.votes}
+            showLabel
+            className="sm:mr-auto"
+          />
           <button type="button" onClick={copyLink} className="btn btn-ghost">
             {copied ? (
               <Check className="size-4 text-accent-2" />

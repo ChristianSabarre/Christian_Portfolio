@@ -71,16 +71,44 @@ export default function SiteContentForm({ settings }: { settings: SiteSettings }
         <h2 className="font-display text-base font-semibold">Identity</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field name="siteTitle" label="Site title" defaultValue={settings.siteTitle} error={err("siteTitle")} />
+          <Field
+            name="sidebarSubtitle"
+            label="Sidebar subtitle"
+            defaultValue={settings.sidebarSubtitle}
+            error={err("sidebarSubtitle")}
+          />
           <Field name="ownerName" label="Owner name" defaultValue={settings.ownerName} error={err("ownerName")} />
         </div>
         <Field
           name="tagline"
-          label="Footer tagline"
+          label="Sidebar blurb"
+          hint="(also used in the footer)"
           defaultValue={settings.tagline}
           textarea
           rows={2}
           error={err("tagline")}
         />
+      </section>
+
+      <section className="glass space-y-4 rounded-2xl p-5">
+        <h2 className="font-display text-base font-semibold">Contact</h2>
+        <p className="-mt-2 text-xs text-muted">
+          Shown in the floating “Contact me” button. Leave both blank to hide it.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            name="contactEmail"
+            label="Email"
+            defaultValue={settings.contactEmail}
+            error={err("contactEmail")}
+          />
+          <Field
+            name="contactLinkedIn"
+            label="LinkedIn URL"
+            defaultValue={settings.contactLinkedIn}
+            error={err("contactLinkedIn")}
+          />
+        </div>
       </section>
 
       <section className="glass space-y-4 rounded-2xl p-5">

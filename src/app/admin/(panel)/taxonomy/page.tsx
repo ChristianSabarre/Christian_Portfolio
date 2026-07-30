@@ -44,20 +44,22 @@ export default async function TaxonomyPage({
       <div className="mt-6 space-y-6">
         <TaxonomyManager
           kind="category"
-          title="Categories"
-          description="Each project has exactly one. Shown as filter chips."
+          title="Collections"
+          description="Each project has exactly one. These are the sidebar entries, with their icons."
+          withIcon
           items={categories.map((c) => ({
             id: c.id,
             name: c.name,
             order: c.order,
+            icon: c.icon,
             usage: c._count.projects,
           }))}
         />
 
         <TaxonomyManager
           kind="platform"
-          title="Collections"
-          description="The badge above each project title, e.g. the hosting platform."
+          title="Groupings"
+          description="The small badge above each project title, e.g. Personal or Coursework."
           items={platforms.map((p) => ({
             id: p.id,
             name: p.name,

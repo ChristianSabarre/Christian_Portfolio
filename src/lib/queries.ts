@@ -13,6 +13,7 @@ export type PublicProject = {
   category: string;
   platform: string;
   tags: string[];
+  votes: number;
 };
 
 export async function getPublicProjects(): Promise<PublicProject[]> {
@@ -23,6 +24,7 @@ export async function getPublicProjects(): Promise<PublicProject[]> {
       category: { select: { name: true } },
       platform: { select: { name: true } },
       tags: { select: { name: true }, orderBy: { name: "asc" } },
+      _count: { select: { votes: true } },
     },
   });
 
@@ -38,6 +40,7 @@ export async function getPublicProjects(): Promise<PublicProject[]> {
     category: p.category.name,
     platform: p.platform.name,
     tags: p.tags.map((t) => t.name),
+    votes: p._count.votes,
   }));
 }
 
@@ -60,6 +63,17 @@ export async function getLinkCards() {
 }
 
 export type LinkCardRow = Awaited<ReturnType<typeof getLinkCards>>[number];
+
+/** Sidebar entry: name, icon, and how many published projects it holds. */
+export type SidebarCategory = { name: string; icon: string; count: number };
+
+export async function getSidebarCategories(): Promise<SidebarCategory[]> {
+  const rows = await prisma.category.findMany({
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+    include: { _count: { select: { projects: { where: { published: true } } } } },
+  });
+  return rows.map((c) => ({ name: c.name, icon: c.icon, count: c._count.projects }));
+}
 
 export function getTaxonomy() {
   return Promise.all([

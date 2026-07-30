@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowRight, Sparkles } from "lucide-react";
 import StatCounter from "./StatCounter";
 import type { SiteSettings } from "@/lib/queries";
@@ -20,7 +22,7 @@ export default function Hero({
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-line-strong to-transparent" />
       </div>
 
-      <div className="mx-auto w-full max-w-7xl px-5 pb-16 pt-16 sm:px-8 sm:pb-24 sm:pt-24">
+      <div className="mx-auto w-full max-w-6xl px-5 pb-12 pt-14 sm:px-8 sm:pb-16 sm:pt-20">
         <div className="max-w-3xl">
           {settings.heroEyebrow ? (
             <p className="eyebrow inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-accent animate-fade-up">

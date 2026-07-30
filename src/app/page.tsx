@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import Hero from "@/components/site/Hero";
-import NewsletterSection from "@/components/site/NewsletterSection";
-import ProjectExplorer from "@/components/site/ProjectExplorer";
-import SiteFooter from "@/components/site/SiteFooter";
-import SiteHeader from "@/components/site/SiteHeader";
-import { getLinkCards, getPublicProjects, getSiteSettings, getTaxonomy } from "@/lib/queries";
+import PortfolioLayout from "@/components/site/PortfolioLayout";
+import {
+  getLinkCards,
+  getPublicProjects,
+  getSidebarCategories,
+  getSiteSettings,
+} from "@/lib/queries";
 
 // Rendered from the database on request; admin mutations revalidate this path.
 export const dynamic = "force-dynamic";
@@ -24,12 +24,20 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function HomePage() {
-  const [projects, settings, links, [categories, , platforms]] = await Promise.all([
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ i?: string }>;
+}) {
+  const { i } = await searchParams;
+  const requestedId = Number(i);
+  const deepLinkId = Number.isInteger(requestedId) && requestedId > 0 ? requestedId : null;
+
+  const [projects, settings, links, categories] = await Promise.all([
     getPublicProjects(),
     getSiteSettings(),
     getLinkCards(),
-    getTaxonomy(),
+    getSidebarCategories(),
   ]);
 
   // A blank stat value means "derive it from the data already loaded above",
@@ -37,29 +45,24 @@ export default async function HomePage() {
   const heroStats = [
     { value: settings.statValue1?.trim() || String(projects.length), label: settings.statLabel1 },
     { value: settings.statValue2?.trim() || String(categories.length), label: settings.statLabel2 },
-    { value: settings.statValue3?.trim() || String(platforms.length), label: settings.statLabel3 },
+    {
+      value: settings.statValue3?.trim() || String(projects.reduce((n, p) => n + p.votes, 0)),
+      label: settings.statLabel3,
+    },
   ];
 
   const newsletterCards = links.filter((l) => l.kind === "NEWSLETTER");
   const footerLinks = links.filter((l) => l.kind === "FOOTER" || l.kind === "SOCIAL");
 
   return (
-    <>
-      <SiteHeader siteTitle={settings.siteTitle} linkedInUrl={settings.heroAltUrl} />
-      <main>
-        <Hero settings={settings} stats={heroStats} />
-        {/* Suspense boundary is required because ProjectExplorer reads
-            useSearchParams() to resolve the ?i=<id> deep link. */}
-        <Suspense fallback={<div className="min-h-[60vh]" />}>
-          <ProjectExplorer
-            projects={projects}
-            categories={categories.map((c) => c.name)}
-            heading={settings.libraryHeading}
-          />
-        </Suspense>
-        <NewsletterSection settings={settings} cards={newsletterCards} />
-      </main>
-      <SiteFooter settings={settings} links={footerLinks} />
-    </>
+    <PortfolioLayout
+      projects={projects}
+      categories={categories}
+      settings={settings}
+      heroStats={heroStats}
+      newsletterCards={newsletterCards}
+      footerLinks={footerLinks}
+      deepLinkId={deepLinkId}
+    />
   );
 }

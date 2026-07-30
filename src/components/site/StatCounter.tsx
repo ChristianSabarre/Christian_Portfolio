@@ -1,57 +1,58 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "motion/react";
+import { useEffect, useRef } from "react";
 
 /**
- * Counts up to `value` the first time it scrolls into view. Non-numeric values
- * (e.g. "10+") are shown verbatim.
+ * Shows `value`, counting up to it the first time it scrolls into view.
+ *
+ * The real number is rendered on the server and never held in state — the
+ * count-up is a DOM text mutation layered on top. So if the animation is
+ * skipped (reduced motion, no IntersectionObserver, effect never runs) the
+ * correct figure is already on screen rather than a stuck zero.
  */
 export default function StatCounter({ value, label }: { value: string; label: string }) {
-  const numeric = Number.parseFloat(value);
-  const isNumeric = Number.isFinite(numeric) && /^\d+$/.test(value.trim());
-  const reduceMotion = useReducedMotion();
-
-  const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(() => (isNumeric && !reduceMotion ? 0 : numeric));
-  const started = useRef(false);
+  const numberRef = useRef<HTMLSpanElement>(null);
+  const target = Number.parseFloat(value);
+  const isNumeric = /^\d+$/.test(value.trim()) && Number.isFinite(target);
 
   useEffect(() => {
-    if (!isNumeric || reduceMotion) return;
-    const node = ref.current;
-    if (!node) return;
+    const node = numberRef.current;
+    if (!node || !isNumeric || target === 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    let frame = 0;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (!entries[0].isIntersecting || started.current) return;
-        started.current = true;
+        if (!entries[0].isIntersecting) return;
         observer.disconnect();
 
         const duration = 1100;
         const start = performance.now();
-        let frame = 0;
-
         const tick = (now: number) => {
           const t = Math.min(1, (now - start) / duration);
           // easeOutExpo — fast start, gentle settle.
           const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-          setShown(Math.round(eased * numeric));
+          node.textContent = String(Math.round(eased * target));
           if (t < 1) frame = requestAnimationFrame(tick);
         };
         frame = requestAnimationFrame(tick);
-        return () => cancelAnimationFrame(frame);
       },
       { threshold: 0.4 },
     );
 
     observer.observe(node);
-    return () => observer.disconnect();
-  }, [isNumeric, numeric, reduceMotion]);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      // Leave the true value behind if we unmount mid-count.
+      node.textContent = String(target);
+    };
+  }, [isNumeric, target]);
 
   return (
-    <div ref={ref} className="text-center sm:text-left">
+    <div className="text-center sm:text-left">
       <div className="font-display text-3xl font-semibold tabular-nums sm:text-4xl">
-        {isNumeric ? shown : value}
+        <span ref={numberRef}>{value}</span>
       </div>
       <div className="eyebrow mt-1 text-faint">{label}</div>
     </div>

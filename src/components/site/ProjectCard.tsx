@@ -3,16 +3,17 @@
 import type { MouseEvent } from "react";
 import { ArrowUpRight, Eye, Star } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
+import UpvoteButton from "./UpvoteButton";
 import type { PublicProject } from "@/lib/queries";
 
 export default function ProjectCard({
   project,
   view,
-  onInspect,
+  onView,
 }: {
   project: PublicProject;
   view: "grid" | "list";
-  onInspect: (project: PublicProject) => void;
+  onView: (project: PublicProject) => void;
 }) {
   const isList = view === "list";
 
@@ -75,14 +76,15 @@ export default function ProjectCard({
           isList ? "shrink-0 sm:w-auto" : "mt-5 border-t border-line pt-4"
         }`}
       >
+        <UpvoteButton projectId={project.id} votes={project.votes} className="shrink-0" />
         <button
           type="button"
-          onClick={() => onInspect(project)}
+          onClick={() => onView(project)}
           className="btn btn-ghost flex-1"
-          aria-label={`Inspect ${project.title}`}
+          aria-label={`View details for ${project.title}`}
         >
           <Eye className="size-4" />
-          Inspect
+          View
         </button>
         <a
           href={project.url}

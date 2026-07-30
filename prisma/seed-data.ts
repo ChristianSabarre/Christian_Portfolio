@@ -16,14 +16,14 @@ export type SeedProject = {
   featured: boolean;
 };
 
-/** Display order of the category filter. */
-export const CATEGORIES = [
-  "Web Development",
-  "Mobile",
-  "Data & Analytics",
-  "AI & Machine Learning",
-  "Design",
-  "Other",
+/** Sidebar collections, in display order. `icon` is a lucide export name. */
+export const CATEGORIES: { name: string; icon: string }[] = [
+  { name: "Web Development", icon: "Code2" },
+  { name: "Mobile", icon: "Smartphone" },
+  { name: "Data & Analytics", icon: "BarChart3" },
+  { name: "AI & Machine Learning", icon: "Cpu" },
+  { name: "Design", icon: "Shapes" },
+  { name: "Other", icon: "Boxes" },
 ];
 
 export const TAGS = [
@@ -90,8 +90,12 @@ export const PROJECTS: SeedProject[] = [
  */
 export const SITE_SETTING = {
   siteTitle: "Christian Sabarre",
+  sidebarSubtitle: "Interactive portfolio",
   ownerName: "Christian Sabarre",
-  tagline: "",
+  tagline: "Browse the applications, dashboards, and experiments I've built, in one place.",
+
+  contactEmail: "ianchristiansabarre@gmail.com",
+  contactLinkedIn: "https://www.linkedin.com/in/christiansabarre/",
 
   heroEyebrow: "",
   heroHeadline: "",
@@ -105,7 +109,7 @@ export const SITE_SETTING = {
   statValue1: null,
   statLabel2: "Categories",
   statValue2: null,
-  statLabel3: "Collections",
+  statLabel3: "Upvotes",
   statValue3: null,
 
   libraryHeading: "Projects",

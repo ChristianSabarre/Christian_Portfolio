@@ -21,11 +21,12 @@ model Platform {
   @@index([order])
 }
 
-/// The primary subject area used by the category filter.
+/// The primary subject area used by the sidebar filter.
 model Category {
   id       Int       @id @default(autoincrement())
   name     String    @unique
   slug     String    @unique
+  icon     String    @default("Box")
   order    Int       @default(0)
   projects Project[]
 
@@ -57,6 +58,7 @@ model Project {
   platformId Int
   platform   Platform @relation(fields: [platformId], references: [id], onDelete: Restrict)
   tags       Tag[]
+  votes      Vote[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -64,6 +66,23 @@ model Project {
   @@index([published, featured, order])
   @@index([categoryId])
   @@index([platformId])
+}
+
+/// One upvote from one visitor.
+///
+/// `voterKey` is a salted hash of the request IP and user agent — never the raw
+/// values — so a visitor can be recognised well enough to block repeat votes
+/// without the address itself being stored. The unique constraint is the real
+/// guard; the client-side check is only for immediate feedback.
+model Vote {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  voterKey  String
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, voterKey])
+  @@index([projectId])
 }
 
 enum LinkKind {
@@ -93,9 +112,14 @@ model LinkCard {
 model SiteSetting {
   id Int @id @default(1)
 
-  siteTitle String @default("Portfolio")
-  ownerName String @default("")
-  tagline   String @default("")
+  siteTitle       String @default("Portfolio")
+  sidebarSubtitle String @default("")
+  ownerName       String @default("")
+  /// Short blurb under the title in the sidebar, reused in the footer.
+  tagline         String @default("")
+
+  contactEmail    String @default("")
+  contactLinkedIn String @default("")
 
   heroEyebrow   String @default("")
   heroHeadline  String @default("")

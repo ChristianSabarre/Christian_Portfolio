@@ -1,3 +1,5 @@
+"use client";
+
 import { Compass } from "lucide-react";
 import type { LinkCardRow, SiteSettings } from "@/lib/queries";
 
@@ -10,7 +12,7 @@ export default function SiteFooter({
 }) {
   return (
     <footer className="mt-auto border-t border-line bg-bg-deep">
-      <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8">
+      <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-8">
         <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5">

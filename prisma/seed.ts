@@ -13,13 +13,17 @@ async function main() {
   console.log("Seeding…");
 
   // Taxonomy is upserted, so re-running tops up the lists without touching
-  // anything that has been renamed or added by hand.
-  for (const [i, name] of CATEGORIES.entries()) {
-    await prisma.category.upsert({
-      where: { name },
-      update: {},
-      create: { name, slug: slugify(name), order: i },
-    });
+  // anything that has been renamed or added by hand. The one exception is an
+  // icon still sitting on the default, which gets filled in.
+  for (const [i, { name, icon }] of CATEGORIES.entries()) {
+    const existing = await prisma.category.findUnique({ where: { name } });
+    if (existing) {
+      if (existing.icon === "Box") {
+        await prisma.category.update({ where: { name }, data: { icon } });
+      }
+    } else {
+      await prisma.category.create({ data: { name, slug: slugify(name), icon, order: i } });
+    }
   }
 
   for (const [i, name] of PLATFORMS.entries()) {
@@ -38,11 +42,22 @@ async function main() {
     });
   }
 
-  await prisma.siteSetting.upsert({
-    where: { id: 1 },
-    update: {},
-    create: { id: 1, ...SITE_SETTING },
-  });
+  // Only fills fields that are still empty, so copy written in the admin panel
+  // is never overwritten by a re-seed.
+  const settings = await prisma.siteSetting.findUnique({ where: { id: 1 } });
+  if (!settings) {
+    await prisma.siteSetting.create({ data: { id: 1, ...SITE_SETTING } });
+  } else {
+    const fill: Record<string, string> = {};
+    for (const [key, value] of Object.entries(SITE_SETTING)) {
+      if (typeof value !== "string" || value === "") continue;
+      if ((settings as unknown as Record<string, unknown>)[key] === "") fill[key] = value;
+    }
+    if (Object.keys(fill).length > 0) {
+      await prisma.siteSetting.update({ where: { id: 1 }, data: fill });
+      console.log("Filled empty settings:", Object.keys(fill).join(", "));
+    }
+  }
 
   for (const card of LINK_CARDS) {
     const existing = await prisma.linkCard.findFirst({

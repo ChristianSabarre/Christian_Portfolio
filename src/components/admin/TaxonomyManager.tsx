@@ -4,9 +4,17 @@ import { useActionState, useState } from "react";
 import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import SubmitButton from "./SubmitButton";
 import ConfirmSubmit from "./ConfirmSubmit";
+import ProjectIcon from "@/components/ProjectIcon";
+import { ICON_NAMES } from "@/lib/icons";
 import { deleteTaxonomyAction, saveTaxonomyAction, type ActionState } from "@/app/admin/actions";
 
-export type TaxonomyItem = { id: number; name: string; order?: number; usage: number };
+export type TaxonomyItem = {
+  id: number;
+  name: string;
+  order?: number;
+  usage: number;
+  icon?: string;
+};
 
 const initialState: ActionState = {};
 
@@ -16,15 +24,18 @@ export default function TaxonomyManager({
   description,
   items,
   ordered = true,
+  withIcon = false,
 }: {
   kind: "category" | "tag" | "platform";
   title: string;
   description: string;
   items: TaxonomyItem[];
   ordered?: boolean;
+  withIcon?: boolean;
 }) {
   const [state, formAction] = useActionState(saveTaxonomyAction, initialState);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [icon, setIcon] = useState<string>("Box");
 
   return (
     <section className="glass rounded-2xl">
@@ -46,6 +57,7 @@ export default function TaxonomyManager({
               >
                 <input type="hidden" name="kind" value={kind} />
                 <input type="hidden" name="id" value={item.id} />
+                {withIcon ? <input type="hidden" name="icon" value={icon} /> : null}
                 <input
                   name="name"
                   defaultValue={item.name}
@@ -75,19 +87,28 @@ export default function TaxonomyManager({
                 >
                   <X className="size-4" />
                 </button>
+                {withIcon ? <IconPicker value={icon} onChange={setIcon} /> : null}
               </form>
             </li>
           ) : (
             <li key={item.id} className="flex items-center gap-3 px-5 py-3">
+              {withIcon ? (
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-accent-soft text-accent">
+                  <ProjectIcon name={item.icon} className="size-4" />
+                </span>
+              ) : null}
               <span className="min-w-0 flex-1 truncate text-sm font-medium">{item.name}</span>
               <span className="chip shrink-0">
                 {item.usage} {item.usage === 1 ? "project" : "projects"}
               </span>
               <button
                 type="button"
-                onClick={() => setEditingId(item.id)}
+                onClick={() => {
+                  setIcon(item.icon ?? "Box");
+                  setEditingId(item.id);
+                }}
                 className="btn btn-ghost shrink-0 size-9 !px-0"
-                aria-label={`Rename ${item.name}`}
+                aria-label={`Edit ${item.name}`}
               >
                 <Pencil className="size-4" />
               </button>
@@ -112,6 +133,7 @@ export default function TaxonomyManager({
 
       <form action={formAction} className="flex flex-wrap items-center gap-2 border-t border-line px-5 py-4">
         <input type="hidden" name="kind" value={kind} />
+        {withIcon ? <input type="hidden" name="icon" value={icon} /> : null}
         <input
           name="name"
           required
@@ -133,6 +155,7 @@ export default function TaxonomyManager({
           <Plus className="size-4" />
           Add
         </SubmitButton>
+        {withIcon ? <IconPicker value={icon} onChange={setIcon} /> : null}
       </form>
 
       {state.message ? (
@@ -144,5 +167,36 @@ export default function TaxonomyManager({
         </p>
       ) : null}
     </section>
+  );
+}
+
+/** Compact icon grid; the chosen name is submitted via a hidden input. */
+function IconPicker({ value, onChange }: { value: string; onChange: (name: string) => void }) {
+  return (
+    <div className="w-full">
+      <p className="label mb-1.5">Sidebar icon</p>
+      <div className="grid max-h-28 grid-cols-10 gap-1.5 overflow-y-auto rounded-xl border border-line p-2">
+        {ICON_NAMES.map((name) => {
+          const on = value === name;
+          return (
+            <button
+              key={name}
+              type="button"
+              onClick={() => onChange(name)}
+              title={name}
+              aria-label={name}
+              aria-pressed={on}
+              className={`grid aspect-square place-items-center rounded-lg border transition-colors ${
+                on
+                  ? "border-transparent bg-accent text-white"
+                  : "border-transparent text-faint hover:bg-surface-hover hover:text-text"
+              }`}
+            >
+              <ProjectIcon name={name} className="size-4" />
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

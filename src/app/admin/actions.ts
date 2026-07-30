@@ -259,6 +259,7 @@ export async function saveTaxonomyAction(
   const parsed = taxonomySchema.safeParse({
     name: formData.get("name"),
     order: formData.get("order") || 0,
+    icon: formData.get("icon") || undefined,
   });
   if (!parsed.success) {
     return { ok: false, message: "Please fix the highlighted fields.", errors: fieldErrors(parsed.error) };
@@ -268,8 +269,13 @@ export async function saveTaxonomyAction(
   const id = idRaw ? Number(idRaw) : null;
   const delegate = taxonomyDelegate(kind);
   const base = { name: parsed.data.name, slug: slugify(parsed.data.name) };
-  // Tags have no explicit ordering.
-  const data = kind === "tag" ? base : { ...base, order: parsed.data.order };
+  // Tags have no explicit ordering; only categories carry a sidebar icon.
+  const data =
+    kind === "tag"
+      ? base
+      : kind === "category"
+        ? { ...base, order: parsed.data.order, ...(parsed.data.icon ? { icon: parsed.data.icon } : {}) }
+        : { ...base, order: parsed.data.order };
 
   try {
     if (id) {

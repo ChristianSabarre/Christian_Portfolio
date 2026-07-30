@@ -53,6 +53,8 @@ export type ProjectInput = z.infer<typeof projectSchema>;
 export const taxonomySchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(80),
   order: z.coerce.number().int().min(0).max(10000).default(0),
+  // Only categories use an icon (shown in the sidebar); other kinds ignore it.
+  icon: z.enum(ICON_NAMES as [string, ...string[]]).optional(),
 });
 
 export const linkCardSchema = z.object({
@@ -65,10 +67,21 @@ export const linkCardSchema = z.object({
   published: z.coerce.boolean().default(true),
 });
 
+/** Blank is allowed; anything else must be a plausible address. */
+const optionalEmail = z
+  .string()
+  .trim()
+  .max(200)
+  .refine((v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "Must be a valid email address");
+
 export const siteSettingSchema = z.object({
   siteTitle: z.string().trim().min(1).max(120),
+  sidebarSubtitle: z.string().trim().max(120).default(""),
   ownerName: z.string().trim().max(160).default(""),
   tagline: z.string().trim().max(400).default(""),
+
+  contactEmail: optionalEmail.default(""),
+  contactLinkedIn: linkTarget.default(""),
 
   heroEyebrow: z.string().trim().max(120).default(""),
   heroHeadline: z.string().trim().max(300).default(""),

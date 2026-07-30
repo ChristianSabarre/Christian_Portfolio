@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowUpRight } from "lucide-react";
 import type { LinkCardRow, SiteSettings } from "@/lib/queries";
 
@@ -12,7 +14,7 @@ export default function NewsletterSection({
 
   return (
     <section className="relative border-t border-line bg-bg-deep/50">
-      <div className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8">
+      <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
           <div>
             {settings.newsletterEyebrow ? (
