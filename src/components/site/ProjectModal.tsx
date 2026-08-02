@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { ArrowUpRight, Check, Link as LinkIcon, Link2, X } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
 import UpvoteButton from "./UpvoteButton";
+import { youTubeEmbedUrl } from "@/lib/youtube";
 import type { PublicProject } from "@/lib/queries";
 
 export default function ProjectModal({
@@ -98,6 +99,8 @@ export default function ProjectModal({
   // animation that never completes would leave the dialog permanently open.
   if (!project) return null;
 
+  const embedUrl = youTubeEmbedUrl(project.videoUrl);
+
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6"
@@ -146,6 +149,21 @@ export default function ProjectModal({
 
         <div className="space-y-5 p-6">
           <p className="eyebrow text-accent">{project.category}</p>
+
+          {/* Above the description on purpose: the video is the richest thing
+              here, and the text then explains what you are looking at. */}
+          {embedUrl ? (
+            <div className="overflow-hidden rounded-xl border border-line bg-black">
+              <iframe
+                src={embedUrl}
+                title={`${project.title} — video`}
+                className="aspect-video w-full"
+                loading="lazy"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          ) : null}
 
           <p className="text-[0.95rem] leading-relaxed text-muted">
             {project.description}

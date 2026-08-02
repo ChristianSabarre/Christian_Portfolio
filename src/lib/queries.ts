@@ -9,6 +9,8 @@ export type PublicProject = {
   displayUrl: string;
   description: string;
   icon: string;
+  coverImage: string;
+  videoUrl: string;
   featured: boolean;
   category: string;
   platform: string;
@@ -36,6 +38,8 @@ export async function getPublicProjects(): Promise<PublicProject[]> {
     displayUrl: p.displayUrl,
     description: p.description,
     icon: p.icon,
+    coverImage: p.coverImage,
+    videoUrl: p.videoUrl,
     featured: p.featured,
     category: p.category.name,
     platform: p.platform.name,

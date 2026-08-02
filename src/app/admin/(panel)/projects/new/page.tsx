@@ -17,6 +17,8 @@ export default async function NewProjectPage() {
       values={{
         title: "",
         url: "",
+        coverImage: "",
+        videoUrl: "",
         displayUrl: "",
         description: "",
         icon: "Box",

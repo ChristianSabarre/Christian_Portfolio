@@ -49,6 +49,10 @@ model Project {
   displayUrl  String
   description String
   icon        String   @default("Box")
+  /// Image URL used as the card background. Blank falls back to the plain card.
+  coverImage  String   @default("")
+  /// YouTube link, embedded in the detail dialog. Blank hides the player.
+  videoUrl    String   @default("")
   featured    Boolean  @default(false)
   order       Int      @default(0)
   published   Boolean  @default(true)

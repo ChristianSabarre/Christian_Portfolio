@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { ICON_NAMES } from "@/lib/icons";
+import { youTubeId } from "@/lib/youtube";
 import ProjectIcon from "@/components/ProjectIcon";
 import SubmitButton from "./SubmitButton";
 import type { ActionState } from "@/app/admin/actions";
@@ -14,6 +15,8 @@ export type ProjectFormValues = {
   id?: number;
   title: string;
   url: string;
+  coverImage: string;
+  videoUrl: string;
   displayUrl: string;
   description: string;
   icon: string;
@@ -45,6 +48,11 @@ export default function ProjectForm({
   const [state, formAction] = useActionState(action, initialState);
   const [icon, setIcon] = useState(values.icon);
   const [selectedTags, setSelectedTags] = useState<number[]>(values.tagIds);
+  const [cover, setCover] = useState(values.coverImage);
+  const [video, setVideo] = useState(values.videoUrl);
+
+  const videoId = youTubeId(video);
+  const videoInvalid = video.trim() !== "" && videoId === null;
 
   const err = (field: string) => state.errors?.[field];
 
@@ -146,6 +154,77 @@ export default function ProjectForm({
               placeholder="Derived from the URL if left blank"
             />
           </div>
+        </div>
+      </section>
+
+      <section className="glass space-y-4 rounded-2xl p-5">
+        <h2 className="font-display text-base font-semibold">Media</h2>
+
+        <div>
+          <label htmlFor="coverImage" className="label">
+            Cover image <span className="font-normal text-faint">(optional)</span>
+          </label>
+          <input
+            id="coverImage"
+            name="coverImage"
+            value={cover}
+            onChange={(e) => setCover(e.target.value)}
+            className="field"
+            placeholder="https://… or /screenshot.png for a file in /public"
+          />
+          <p className="mt-1 text-xs text-faint">
+            Fills the whole card behind the text. Landscape images around 1200×800 work best.
+          </p>
+          {err("coverImage") ? (
+            <p className="mt-1 text-xs text-red-400">{err("coverImage")}</p>
+          ) : null}
+          {cover.trim() && !err("coverImage") ? (
+            // Plain img, not next/image: the URL can point at any host and
+            // next/image would need every one whitelisted in next.config.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={cover}
+              alt=""
+              className="mt-3 h-32 w-full rounded-xl border border-line object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : null}
+        </div>
+
+        <div>
+          <label htmlFor="videoUrl" className="label">
+            YouTube video <span className="font-normal text-faint">(optional)</span>
+          </label>
+          <input
+            id="videoUrl"
+            name="videoUrl"
+            value={video}
+            onChange={(e) => setVideo(e.target.value)}
+            className="field"
+            placeholder="https://www.youtube.com/watch?v=…"
+          />
+          <p className="mt-1 text-xs text-faint">
+            Plays inside the project dialog. Paste any YouTube link — watch, youtu.be, or shorts.
+          </p>
+          {videoInvalid ? (
+            <p className="mt-1 text-xs text-red-400">
+              That does not look like a YouTube link.
+            </p>
+          ) : null}
+          {err("videoUrl") ? <p className="mt-1 text-xs text-red-400">{err("videoUrl")}</p> : null}
+          {videoId ? (
+            <div className="mt-3 overflow-hidden rounded-xl border border-line">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0`}
+                title="Video preview"
+                className="aspect-video w-full"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          ) : null}
         </div>
       </section>
 

@@ -39,6 +39,8 @@ export default async function EditProjectPage({
           id: project.id,
           title: project.title,
           url: project.url,
+          coverImage: project.coverImage,
+          videoUrl: project.videoUrl,
           displayUrl: project.displayUrl,
           description: project.description,
           icon: project.icon,
