@@ -6,6 +6,7 @@ import { ArrowLeft, Check } from "lucide-react";
 import { ICON_NAMES } from "@/lib/icons";
 import { youTubeId } from "@/lib/youtube";
 import ProjectIcon from "@/components/ProjectIcon";
+import ImageDropzone from "./ImageDropzone";
 import SubmitButton from "./SubmitButton";
 import type { ActionState } from "@/app/admin/actions";
 
@@ -161,35 +162,33 @@ export default function ProjectForm({
         <h2 className="font-display text-base font-semibold">Media</h2>
 
         <div>
-          <label htmlFor="coverImage" className="label">
+          <span className="label">
             Cover image <span className="font-normal text-faint">(optional)</span>
-          </label>
-          <input
-            id="coverImage"
-            name="coverImage"
-            value={cover}
-            onChange={(e) => setCover(e.target.value)}
-            className="field"
-            placeholder="https://… or /screenshot.png for a file in /public"
-          />
-          <p className="mt-1 text-xs text-faint">
-            Fills the whole card behind the text. Landscape images around 1200×800 work best.
+          </span>
+          <p className="-mt-1 mb-2 text-xs text-faint">
+            Fills the whole card behind the text. Landscape images work best.
           </p>
+
+          {/* The value is submitted from a hidden input so the dropzone and the
+              URL box stay two ways of setting one field. */}
+          <input type="hidden" name="coverImage" value={cover} />
+          <ImageDropzone value={cover} onChange={setCover} />
+
+          <details className="mt-2">
+            <summary className="cursor-pointer text-xs text-faint hover:text-text">
+              Or paste an image URL
+            </summary>
+            <input
+              value={cover}
+              onChange={(e) => setCover(e.target.value)}
+              className="field mt-2"
+              placeholder="https://… or /screenshot.png"
+              aria-label="Cover image URL"
+            />
+          </details>
+
           {err("coverImage") ? (
             <p className="mt-1 text-xs text-red-400">{err("coverImage")}</p>
-          ) : null}
-          {cover.trim() && !err("coverImage") ? (
-            // Plain img, not next/image: the URL can point at any host and
-            // next/image would need every one whitelisted in next.config.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={cover}
-              alt=""
-              className="mt-3 h-32 w-full rounded-xl border border-line object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
           ) : null}
         </div>
 

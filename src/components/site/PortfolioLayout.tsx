@@ -9,6 +9,7 @@ import ProjectModal from "./ProjectModal";
 import ContactWidget from "./ContactWidget";
 import CustomCursor from "./CustomCursor";
 import IntroOverlay from "./IntroOverlay";
+import SmoothScroll from "./SmoothScroll";
 import Hero from "./Hero";
 import NewsletterSection from "./NewsletterSection";
 import SiteFooter from "./SiteFooter";
@@ -370,6 +371,7 @@ export default function PortfolioLayout({
       <ContactWidget email={settings.contactEmail} linkedIn={settings.contactLinkedIn} />
       <CustomCursor />
       <IntroOverlay title={siteTitle} />
+      <SmoothScroll />
     </div>
   );
 }

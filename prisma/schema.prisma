@@ -89,6 +89,22 @@ model Vote {
   @@index([projectId])
 }
 
+/// An uploaded image, stored in the database and served from /api/assets/<id>.
+///
+/// Kept in Postgres rather than object storage so the project needs no extra
+/// service or credential. Uploads are resized and re-encoded in the browser
+/// first, so rows stay small; the serve route sets immutable cache headers so
+/// the CDN, not this table, handles repeat traffic.
+model Asset {
+  id          Int      @id @default(autoincrement())
+  data        Bytes
+  contentType String
+  width       Int
+  height      Int
+  bytes       Int
+  createdAt   DateTime @default(now())
+}
+
 enum LinkKind {
   NEWSLETTER
   FOOTER
