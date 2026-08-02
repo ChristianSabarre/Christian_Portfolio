@@ -7,6 +7,8 @@ import Sidebar, { ALL_CATEGORIES } from "./Sidebar";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import ContactWidget from "./ContactWidget";
+import CustomCursor from "./CustomCursor";
+import IntroOverlay from "./IntroOverlay";
 import Hero from "./Hero";
 import NewsletterSection from "./NewsletterSection";
 import SiteFooter from "./SiteFooter";
@@ -52,6 +54,8 @@ export default function PortfolioLayout({
   const [sort, setSort] = useState<SortKey>("featured");
   const [view, setView] = useState<ViewMode>("grid");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Rect of the card that opened the dialog, so it can scale out of it.
+  const [origin, setOrigin] = useState<DOMRect | null>(null);
 
   const searchRef = useRef<HTMLInputElement>(null);
   const reduceMotion = useReducedMotion();
@@ -102,7 +106,8 @@ export default function PortfolioLayout({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const openModal = useCallback((project: PublicProject) => {
+  const openModal = useCallback((project: PublicProject, from?: DOMRect) => {
+    setOrigin(from ?? null);
     setActive(project);
     // replaceState keeps the deep link shareable without a scroll-resetting nav.
     const url = new URL(window.location.href);
@@ -361,8 +366,10 @@ export default function PortfolioLayout({
         <SiteFooter settings={settings} links={footerLinks} />
       </div>
 
-      <ProjectModal project={active} onClose={closeModal} />
+      <ProjectModal project={active} origin={origin} onClose={closeModal} />
       <ContactWidget email={settings.contactEmail} linkedIn={settings.contactLinkedIn} />
+      <CustomCursor />
+      <IntroOverlay title={siteTitle} />
     </div>
   );
 }

@@ -10,9 +10,12 @@ import type { PublicProject } from "@/lib/queries";
 
 export default function ProjectModal({
   project,
+  origin,
   onClose,
 }: {
   project: PublicProject | null;
+  /** Rect of the card that opened this, so the panel grows out of it. */
+  origin?: DOMRect | null;
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -120,9 +123,21 @@ export default function ProjectModal({
         aria-modal="true"
         aria-labelledby="project-modal-title"
         className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-line-strong bg-bg-raised shadow-2xl sm:rounded-3xl"
-        initial={{ opacity: 0, y: 28, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: "spring", stiffness: 380, damping: 32 }}
+        initial={
+          // Start from the clicked card's centre and size, so the panel reads
+          // as growing out of it. Falls back to a plain rise when opened from a
+          // deep link, where there is no source card.
+          origin
+            ? {
+                opacity: 0,
+                x: origin.left + origin.width / 2 - window.innerWidth / 2,
+                y: origin.top + origin.height / 2 - window.innerHeight / 2,
+                scale: Math.max(0.25, Math.min(origin.width / window.innerWidth, 0.8)),
+              }
+            : { opacity: 0, y: 28, scale: 0.97 }
+        }
+        animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 28, mass: 0.8 }}
       >
         <div className="flex items-start gap-4 border-b border-line p-6">
           <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-line bg-accent-soft text-accent">

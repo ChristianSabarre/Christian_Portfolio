@@ -1,10 +1,13 @@
 "use client";
 
-import type { MouseEvent } from "react";
+import { useRef, type MouseEvent, type PointerEvent } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { ArrowUpRight, Eye, Play, Star } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
 import UpvoteButton from "./UpvoteButton";
+import Magnetic from "./Magnetic";
 import { youTubeId } from "@/lib/youtube";
+import { useRichPointerEffects } from "@/lib/useMedia";
 import type { PublicProject } from "@/lib/queries";
 
 export default function ProjectCard({
@@ -14,12 +17,28 @@ export default function ProjectCard({
 }: {
   project: PublicProject;
   view: "grid" | "list";
-  onView: (project: PublicProject) => void;
+  onView: (project: PublicProject, origin?: DOMRect) => void;
 }) {
   const isList = view === "list";
   const cover = project.coverImage?.trim();
   const hasCover = Boolean(cover);
   const hasVideo = youTubeId(project.videoUrl) !== null;
+
+  const cardRef = useRef<HTMLElement>(null);
+  const tiltEnabled = useRichPointerEffects() && !isList;
+
+  // -0.5..0.5 across the card, springed so the tilt settles rather than snaps.
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const spring = { stiffness: 260, damping: 20, mass: 0.6 };
+  const sx = useSpring(px, spring);
+  const sy = useSpring(py, spring);
+
+  const rotateY = useTransform(sx, [-0.5, 0.5], [-9, 9]);
+  const rotateX = useTransform(sy, [-0.5, 0.5], [7, -7]);
+  // Cover drifts the opposite way to the tilt, which reads as depth.
+  const coverX = useTransform(sx, [-0.5, 0.5], ["4%", "-4%"]);
+  const coverY = useTransform(sy, [-0.5, 0.5], ["4%", "-4%"]);
 
   // Feeds the .spotlight radial gradient so the glow tracks the cursor.
   function trackPointer(event: MouseEvent<HTMLElement>) {
@@ -28,22 +47,51 @@ export default function ProjectCard({
     event.currentTarget.style.setProperty("--my", `${event.clientY - rect.top}px`);
   }
 
+  function trackTilt(event: PointerEvent<HTMLElement>) {
+    if (!tiltEnabled) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    px.set((event.clientX - rect.left) / rect.width - 0.5);
+    py.set((event.clientY - rect.top) / rect.height - 0.5);
+  }
+
+  function resetTilt() {
+    px.set(0);
+    py.set(0);
+  }
+
   return (
-    <article
+    <motion.article
+      ref={cardRef}
       onMouseMove={trackPointer}
+      onPointerMove={trackTilt}
+      onPointerLeave={resetTilt}
       data-cover={hasCover ? "" : undefined}
-      className={`spotlight group relative flex overflow-hidden rounded-[--radius-card] transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 ${
+      style={
+        tiltEnabled
+          ? { rotateX, rotateY, transformPerspective: 900, transformStyle: "preserve-3d" }
+          : undefined
+      }
+      whileHover={tiltEnabled ? { y: -6, scale: 1.015 } : undefined}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      className={`spotlight group relative flex overflow-hidden rounded-[--radius-card] ${
+        tiltEnabled ? "" : "transition-all duration-300 hover:-translate-y-1"
+      } hover:shadow-2xl hover:shadow-black/30 ${
         hasCover ? "card-cover border border-line-strong" : "glass hover:border-line-strong"
       } ${isList ? "flex-col gap-4 p-5 sm:flex-row sm:items-center" : "flex-col p-5"}`}
     >
       {hasCover ? (
         <>
           {/* Photo layer. A plain background image rather than next/image so any
-              host works without being whitelisted in next.config. */}
-          <span
+              host works without being whitelisted in next.config. Inset beyond
+              the edges so the parallax drift never exposes a bare corner. */}
+          <motion.span
             aria-hidden
-            className="absolute inset-0 -z-10 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-            style={{ backgroundImage: `url("${cover}")` }}
+            className="absolute -inset-[6%] -z-10 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+            style={
+              tiltEnabled
+                ? { backgroundImage: `url("${cover}")`, x: coverX, y: coverY }
+                : { backgroundImage: `url("${cover}")` }
+            }
           />
           {/* Scrim: keeps text legible over an arbitrary photo, in both themes. */}
           <span aria-hidden className="card-cover-scrim absolute inset-0 -z-10" />
@@ -117,24 +165,26 @@ export default function ProjectCard({
         <UpvoteButton projectId={project.id} votes={project.votes} className="shrink-0" />
         <button
           type="button"
-          onClick={() => onView(project)}
+          onClick={() => onView(project, cardRef.current?.getBoundingClientRect())}
           className="btn btn-ghost flex-1"
           aria-label={`View details for ${project.title}`}
         >
           <Eye className="size-4" />
           View
         </button>
-        <a
-          href={project.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-primary flex-1"
-          aria-label={`Open ${project.title} in a new tab`}
-        >
-          Open
-          <ArrowUpRight className="size-4" />
-        </a>
+        <Magnetic className="flex-1" strength={0.25}>
+          <a
+            href={project.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary w-full"
+            aria-label={`Open ${project.title} in a new tab`}
+          >
+            Open
+            <ArrowUpRight className="size-4" />
+          </a>
+        </Magnetic>
       </div>
-    </article>
+    </motion.article>
   );
 }

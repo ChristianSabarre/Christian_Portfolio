@@ -2,6 +2,9 @@
 
 import { ArrowRight, Sparkles } from "lucide-react";
 import StatCounter from "./StatCounter";
+import ParticleWeb from "./ParticleWeb";
+import RevealText from "./RevealText";
+import Magnetic from "./Magnetic";
 import type { SiteSettings } from "@/lib/queries";
 
 type Stat = { value: string; label: string };
@@ -22,6 +25,9 @@ export default function Hero({
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-line-strong to-transparent" />
       </div>
 
+      {/* Pointer-reactive node field. Renders nothing under reduced motion. */}
+      <ParticleWeb className="-z-10 opacity-70" />
+
       <div className="mx-auto w-full max-w-6xl px-5 pb-12 pt-14 sm:px-8 sm:pb-16 sm:pt-20">
         <div className="max-w-3xl">
           {settings.heroEyebrow ? (
@@ -37,7 +43,7 @@ export default function Hero({
             className="gradient-text mt-6 text-balance font-display text-4xl font-semibold leading-[1.08] animate-fade-up sm:text-6xl"
             style={{ animationDelay: "60ms" }}
           >
-            {settings.heroHeadline || settings.siteTitle}
+            <RevealText text={settings.heroHeadline || settings.siteTitle} delay={0.15} />
           </h1>
 
           {settings.heroIntro ? (
@@ -54,10 +60,12 @@ export default function Hero({
             style={{ animationDelay: "180ms" }}
           >
             {settings.heroCtaLabel ? (
-              <a href={settings.heroCtaUrl || "#projects"} className="btn btn-primary group">
-                {settings.heroCtaLabel}
-                <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </a>
+              <Magnetic>
+                <a href={settings.heroCtaUrl || "#projects"} className="btn btn-primary group">
+                  {settings.heroCtaLabel}
+                  <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </a>
+              </Magnetic>
             ) : null}
             {settings.heroAltLabel && settings.heroAltUrl ? (
               <a
