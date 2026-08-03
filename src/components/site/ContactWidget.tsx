@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { MessageCircle, X } from "lucide-react";
 import PixelSprite from "@/components/PixelSprite";
+import { track } from "@/lib/achievements";
 
 /** lucide 1.x dropped brand marks, so the LinkedIn glyph is inlined. */
 function LinkedInMark({ className }: { className?: string }) {
@@ -28,7 +29,10 @@ export default function ContactWidget({
 
   function toggle() {
     setOpen((v) => {
-      if (!v) setOpenCount((c) => c + 1);
+      if (!v) {
+        setOpenCount((c) => c + 1);
+        track.contact();
+      }
       return !v;
     });
   }

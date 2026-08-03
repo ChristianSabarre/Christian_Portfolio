@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { motion } from "motion/react";
 import PixelSprite from "@/components/PixelSprite";
+import { track } from "@/lib/achievements";
 import { upvoteProject } from "@/app/actions/vote";
 
 const STORAGE_KEY = "portfolio-upvotes";
@@ -61,6 +62,7 @@ export default function UpvoteButton({
     setVoted(true);
     setBurst((b) => b + 1);
     rememberVoted(projectId);
+    track.vote(readVoted().length);
 
     startTransition(async () => {
       const result = await upvoteProject(projectId);

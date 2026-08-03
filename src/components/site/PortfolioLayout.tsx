@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { LayoutGrid, List, Menu, Search, X } from "lucide-react";
 import Sidebar, { ALL_CATEGORIES } from "./Sidebar";
+import AchievementToasts from "./AchievementToasts";
 import PixelSprite from "@/components/PixelSprite";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
@@ -14,6 +15,7 @@ import SmoothScroll from "./SmoothScroll";
 import Hero from "./Hero";
 import NewsletterSection from "./NewsletterSection";
 import SiteFooter from "./SiteFooter";
+import { track } from "@/lib/achievements";
 import type { LinkCardRow, PublicProject, SidebarCategory, SiteSettings } from "@/lib/queries";
 
 type SortKey = "featured" | "az" | "za" | "votes";
@@ -130,11 +132,13 @@ export default function PortfolioLayout({
   const openModal = useCallback((project: PublicProject, from?: DOMRect) => {
     setOrigin(from ?? null);
     setActive(project);
+    track.viewProject(project.id, projects.length);
     // replaceState keeps the deep link shareable without a scroll-resetting nav.
     const url = new URL(window.location.href);
     url.searchParams.set("i", String(project.id));
     window.history.replaceState({}, "", url);
-  }, []);
+     
+  }, [projects.length]);
 
   const closeModal = useCallback(() => {
     setActive(null);
@@ -145,6 +149,7 @@ export default function PortfolioLayout({
 
   function selectCategory(name: string) {
     setCategory(name);
+    if (name !== ALL_CATEGORIES) track.filter();
     closeDrawer();
   }
 
@@ -410,6 +415,7 @@ export default function PortfolioLayout({
         <SiteFooter settings={settings} links={footerLinks} />
       </div>
 
+      <AchievementToasts />
       <ProjectModal project={active} origin={origin} onClose={closeModal} />
       <ContactWidget email={settings.contactEmail} linkedIn={settings.contactLinkedIn} />
       <CustomCursor />

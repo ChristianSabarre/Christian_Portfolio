@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { track } from "@/lib/achievements";
 
 /**
  * Stateless by design: which glyph shows is decided by CSS off the
@@ -12,6 +13,7 @@ export default function ThemeToggle() {
     const root = document.documentElement;
     const next = root.dataset.theme === "light" ? "dark" : "light";
     root.dataset.theme = next;
+    track.theme();
     try {
       localStorage.setItem("portfolio-theme", next);
     } catch {
