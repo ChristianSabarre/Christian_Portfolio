@@ -1,15 +1,15 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element -- sprite strips animate via CSS
-   steps() over a translated <img>; next/image's wrapper interferes and the
-   assets are tiny local PNGs that need no optimisation. */
+import { useEffect, useRef } from "react";
 
 /**
- * Plays a one-row sprite sheet using CSS steps() — no JS per frame.
+ * Plays a one-row sprite sheet by stepping background-position with a JS timer.
  *
- * The strip is `frames` cells wide; animating translateX from 0 to -100% in
- * `steps(frames)` shows each cell in turn. Under prefers-reduced-motion the
- * animation is disabled by globals.css and the first frame stays visible.
+ * Deliberately JS-driven rather than a CSS animation: the site's reduced-motion
+ * rules zero out CSS animation durations globally, and many Windows machines
+ * ship with "Animation effects" off — which froze the avatar for exactly the
+ * person it depicts. A ~2fps 60px sprite is decorative, not vestibular, so it
+ * is exempted by default; pass respectReducedMotion to opt back in.
  */
 export default function PixelSprite({
   src,
@@ -18,6 +18,7 @@ export default function PixelSprite({
   fps = 2,
   alt = "",
   className = "",
+  respectReducedMotion = false,
 }: {
   /** Path to a one-row sprite sheet in /public. */
   src: string;
@@ -27,26 +28,44 @@ export default function PixelSprite({
   fps?: number;
   alt?: string;
   className?: string;
+  respectReducedMotion?: boolean;
 }) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || frames <= 1) return;
+    if (respectReducedMotion && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    let frame = 0;
+    const id = window.setInterval(
+      () => {
+        if (document.hidden) return;
+        frame = (frame + 1) % frames;
+        // With background-size at frames×100%, x% aligns frame x/(n-1).
+        node.style.backgroundPosition = `${(frame / (frames - 1)) * 100}% 0%`;
+      },
+      Math.max(40, Math.round(1000 / fps)),
+    );
+    return () => window.clearInterval(id);
+  }, [frames, fps, respectReducedMotion]);
+
   return (
     <span
+      ref={ref}
       className={`pixel-sprite ${className}`}
-      style={{ width: size, height: size }}
+      style={{
+        width: size,
+        height: size,
+        backgroundImage: `url("${src}")`,
+        backgroundSize: `${frames * 100}% 100%`,
+        backgroundPosition: "0% 0%",
+      }}
       role={alt ? "img" : undefined}
       aria-label={alt || undefined}
       aria-hidden={alt ? undefined : true}
-    >
-      <img
-        src={src}
-        alt=""
-        draggable={false}
-        style={{
-          height: size,
-          width: size * frames,
-          animationDuration: `${frames / fps}s`,
-          animationTimingFunction: `steps(${frames})`,
-        }}
-      />
-    </span>
+    />
   );
 }

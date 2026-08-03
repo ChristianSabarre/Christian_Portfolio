@@ -375,28 +375,10 @@
   background: oklch(1 0 0 / 0.22);
 }
 
-/* Sprite-sheet playback for PixelSprite. Unlayered for the same reason as
-   .card-cover: utilities must not override it. steps() timing and duration are
-   set inline per instance; reduced motion freezes on the first frame. */
+/* PixelSprite frames are stepped from JS (see the component for why), so the
+   only CSS it needs is crisp scaling. Unlayered so utilities cannot blur it. */
 .pixel-sprite {
   display: inline-block;
-  overflow: hidden;
-  position: relative;
-}
-.pixel-sprite > img {
-  display: block;
-  max-width: none;
   image-rendering: pixelated;
-  animation-name: sprite-steps;
-  animation-iteration-count: infinite;
-}
-@keyframes sprite-steps {
-  to {
-    transform: translateX(-100%);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pixel-sprite > img {
-    animation: none;
-  }
+  background-repeat: no-repeat;
 }
