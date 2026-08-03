@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { LayoutGrid, X } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
+import PixelSprite from "@/components/PixelSprite";
 import ThemeToggle from "./ThemeToggle";
 import type { SidebarCategory } from "@/lib/queries";
 
@@ -30,24 +30,15 @@ export default function Sidebar({
   return (
     <div className="flex h-full flex-col gap-7 overflow-y-auto bg-bg-deep px-5 py-6">
       <div className="flex items-start gap-3.5">
-        {/* Both variants render; CSS picks one off [data-theme] so there is no
-            flash of the wrong image and nothing to hydrate. */}
-        <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line-strong">
-          <Image
-            src="/profile-dark.png"
+        {/* Animated pixel avatar. The sheet has a transparent background, so
+            one asset works in both themes over the soft accent tile. */}
+        <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-accent-soft ring-1 ring-line-strong">
+          <PixelSprite
+            src="/sprites/chris-idle.png"
+            frames={4}
+            size={60}
+            fps={1.6}
             alt={siteTitle}
-            width={112}
-            height={112}
-            priority
-            className="size-full object-cover light:hidden"
-          />
-          <Image
-            src="/profile-light.png"
-            alt=""
-            aria-hidden
-            width={112}
-            height={112}
-            className="absolute inset-0 hidden size-full object-cover light:block"
           />
         </span>
 
