@@ -34,10 +34,10 @@ export default function Sidebar({
             one asset works in both themes over the soft accent tile. */}
         <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-accent-soft ring-1 ring-line-strong">
           <PixelSprite
-            src="/sprites/chris-idle.png"
-            frames={4}
+            src="/sprites/chris-talk.png"
+            frames={6}
             size={60}
-            fps={1.6}
+            fps={5}
             alt={siteTitle}
           />
         </span>

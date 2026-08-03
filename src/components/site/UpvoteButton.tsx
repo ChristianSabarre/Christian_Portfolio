@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { ArrowBigUp } from "lucide-react";
+import PixelSprite from "@/components/PixelSprite";
 import { upvoteProject } from "@/app/actions/vote";
 
 const STORAGE_KEY = "portfolio-upvotes";
@@ -42,6 +42,8 @@ export default function UpvoteButton({
   const [known, setKnown] = useState<number | null>(null);
   const [voted, setVoted] = useState(false);
   const [pending, startTransition] = useTransition();
+  // Incremented per vote to trigger the heart sprite's one-shot burst.
+  const [burst, setBurst] = useState(0);
   const count = Math.max(votes, known ?? 0);
 
   // Local record of what this browser has voted for. Read after hydration
@@ -56,6 +58,7 @@ export default function UpvoteButton({
     if (voted || pending) return;
     setKnown(count + 1);
     setVoted(true);
+    setBurst((b) => b + 1);
     rememberVoted(projectId);
 
     startTransition(async () => {
@@ -74,7 +77,17 @@ export default function UpvoteButton({
       aria-label={voted ? `Upvoted, ${count} total` : `Upvote this project, ${count} so far`}
       className={`btn ${voted ? "btn-ghost !border-accent/40 !text-accent" : "btn-ghost"} !disabled:opacity-100 ${className}`}
     >
-      <ArrowBigUp className={`size-4 ${voted ? "fill-current" : ""}`} />
+      {/* Plain heart at rest; the burst plays through to the arrow-struck
+          heart on vote, which then stays as the "voted" glyph. */}
+      <PixelSprite
+        src="/sprites/heart-pop.png"
+        frames={6}
+        size={18}
+        fps={12}
+        mode="once"
+        playKey={burst}
+        restFrame={voted ? 5 : 0}
+      />
       <span className="tabular-nums">{count}</span>
       {showLabel ? <span>{voted ? "Upvoted" : "Upvote"}</span> : null}
     </button>

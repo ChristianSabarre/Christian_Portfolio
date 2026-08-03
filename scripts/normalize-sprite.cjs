@@ -48,10 +48,14 @@ async function main() {
   const corners = [px(0, 0), px(W - 1, 0), px(0, H - 1), px(W - 1, H - 1)];
   const bg = [0, 1, 2].map((c) => Math.round(corners.reduce((s, i) => s + data[i + c], 0) / 4));
   const TOL = 28;
+  // Near-white also counts as background: flattened exports leave white halo
+  // lumps attached to the art from outside. Enclosed whites (teeth, cursor
+  // bodies) sit behind outlines the flood cannot cross, so they survive.
   const isBg = (i) =>
-    Math.abs(data[i] - bg[0]) <= TOL &&
-    Math.abs(data[i + 1] - bg[1]) <= TOL &&
-    Math.abs(data[i + 2] - bg[2]) <= TOL;
+    (Math.abs(data[i] - bg[0]) <= TOL &&
+      Math.abs(data[i + 1] - bg[1]) <= TOL &&
+      Math.abs(data[i + 2] - bg[2]) <= TOL) ||
+    (data[i] >= 232 && data[i + 1] >= 232 && data[i + 2] >= 232);
 
   // Edge-connected flood fill marking background pixels transparent.
   const seen = new Uint8Array(W * H);

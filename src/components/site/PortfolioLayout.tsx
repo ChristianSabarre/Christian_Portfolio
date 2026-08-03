@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { LayoutGrid, List, Menu, Search, SearchX, X } from "lucide-react";
+import { LayoutGrid, List, Menu, Search, X } from "lucide-react";
 import Sidebar, { ALL_CATEGORIES } from "./Sidebar";
+import PixelSprite from "@/components/PixelSprite";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import ContactWidget from "./ContactWidget";
@@ -309,7 +310,7 @@ export default function PortfolioLayout({
 
             {visible.length === 0 ? (
               <div className="glass flex flex-col items-center gap-3 rounded-[--radius-card] px-6 py-20 text-center">
-                <SearchX className="size-8 text-faint" />
+                <PixelSprite src="/sprites/chris-idle.png" frames={4} size={96} fps={1.4} />
                 <p className="font-display text-lg font-semibold">
                   No projects match those filters
                 </p>

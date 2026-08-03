@@ -2,7 +2,8 @@
 
 import { useRef, type MouseEvent, type PointerEvent } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { ArrowUpRight, Eye, Play, Star } from "lucide-react";
+import { ArrowUpRight, Eye, Play } from "lucide-react";
+import PixelSprite from "@/components/PixelSprite";
 import ProjectIcon from "@/components/ProjectIcon";
 import UpvoteButton from "./UpvoteButton";
 import Magnetic from "./Magnetic";
@@ -115,7 +116,7 @@ export default function ProjectCard({
             }`}
             title="Featured project"
           >
-            <Star className="size-2.5 fill-current" />
+            <PixelSprite src="/sprites/star-twinkle.png" frames={6} size={12} fps={5} />
             Featured
           </span>
         ) : null}
