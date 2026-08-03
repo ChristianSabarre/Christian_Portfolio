@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { motion } from "motion/react";
 import PixelSprite from "@/components/PixelSprite";
 import { upvoteProject } from "@/app/actions/vote";
 
@@ -75,8 +76,20 @@ export default function UpvoteButton({
       aria-pressed={voted}
       title={voted ? "You already upvoted this" : "Upvote this project"}
       aria-label={voted ? `Upvoted, ${count} total` : `Upvote this project, ${count} so far`}
-      className={`btn ${voted ? "btn-ghost !border-accent/40 !text-accent" : "btn-ghost"} !disabled:opacity-100 ${className}`}
+      className={`btn relative ${voted ? "btn-ghost !border-accent/40 !text-accent" : "btn-ghost"} !disabled:opacity-100 ${className}`}
     >
+      {burst > 0 ? (
+        <motion.span
+          key={burst}
+          aria-hidden
+          className="pointer-events-none absolute -top-1 left-1/2 font-display text-xs font-bold text-gold"
+          initial={{ opacity: 1, y: 0, x: "-50%" }}
+          animate={{ opacity: 0, y: -26 }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+        >
+          +1
+        </motion.span>
+      ) : null}
       {/* Plain heart at rest; the burst plays through to the arrow-struck
           heart on vote, which then stays as the "voted" glyph. */}
       <PixelSprite

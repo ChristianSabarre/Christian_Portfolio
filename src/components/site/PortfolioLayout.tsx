@@ -55,7 +55,10 @@ export default function PortfolioLayout({
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
   const [sort, setSort] = useState<SortKey>("featured");
   const [view, setView] = useState<ViewMode>("grid");
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // 'closing' keeps the drawer mounted long enough to animate out — unmounting
+  // is timer-driven, never an animation callback (those can fail to fire).
+  const [drawer, setDrawer] = useState<"closed" | "open" | "closing">("closed");
+  const [desktopSidebar, setDesktopSidebar] = useState(true);
   // Rect of the card that opened the dialog, so it can scale out of it.
   const [origin, setOrigin] = useState<DOMRect | null>(null);
 
@@ -68,18 +71,34 @@ export default function PortfolioLayout({
     () => projects.find((p) => p.id === deepLinkId) ?? null,
   );
 
-  // Restore the saved view preference. This has to happen after hydration
-  // rather than in the initial state: the server has no access to
-  // localStorage, so seeding from it during render would mismatch.
+  // Restore saved preferences. This has to happen after hydration rather than
+  // in the initial state: the server has no access to localStorage, so seeding
+  // from it during render would mismatch.
   useEffect(() => {
     try {
       const saved = localStorage.getItem("portfolio-view");
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time preference restore, see above
       if (saved === "grid" || saved === "list") setView(saved);
+       
+      if (localStorage.getItem("portfolio-sidebar") === "0") setDesktopSidebar(false);
     } catch {
-      // Storage unavailable — stick with the default grid.
+      // Storage unavailable — stick with the defaults.
     }
   }, []);
+
+  function toggleDesktopSidebar(open: boolean) {
+    setDesktopSidebar(open);
+    try {
+      localStorage.setItem("portfolio-sidebar", open ? "1" : "0");
+    } catch {
+      // Non-fatal.
+    }
+  }
+
+  function closeDrawer() {
+    setDrawer("closing");
+    window.setTimeout(() => setDrawer("closed"), 260);
+  }
 
   function changeView(next: ViewMode) {
     setView(next);
@@ -126,7 +145,7 @@ export default function PortfolioLayout({
 
   function selectCategory(name: string) {
     setCategory(name);
-    setDrawerOpen(false);
+    closeDrawer();
   }
 
   const visible = useMemo(() => {
@@ -162,41 +181,64 @@ export default function PortfolioLayout({
 
   const hasFilters = query.trim() !== "" || category !== ALL_CATEGORIES;
 
-  const sidebar = (
-    <Sidebar
-      siteTitle={siteTitle}
-      subtitle={settings.sidebarSubtitle}
-      blurb={settings.tagline}
-      categories={categories}
-      totalCount={projects.length}
-      selected={category}
-      onSelect={selectCategory}
-      onClose={drawerOpen ? () => setDrawerOpen(false) : undefined}
-    />
-  );
+  const sidebarProps = {
+    siteTitle,
+    subtitle: settings.sidebarSubtitle,
+    blurb: settings.tagline,
+    categories,
+    totalCount: projects.length,
+    selected: category,
+    onSelect: selectCategory,
+  };
 
   return (
     <div className="flex min-h-dvh">
-      {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh w-[19rem] shrink-0 border-r border-line lg:block">
-        {sidebar}
-      </aside>
+      {/* Desktop sidebar — collapsible, slides rather than squishes. */}
+      <motion.aside
+        className="sticky top-0 hidden h-dvh shrink-0 overflow-hidden border-line lg:block"
+        initial={false}
+        animate={{
+          width: desktopSidebar ? "19rem" : "0rem",
+          borderRightWidth: desktopSidebar ? 1 : 0,
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 32 }}
+      >
+        <div className="h-full w-[19rem]">
+          <Sidebar {...sidebarProps} onCollapse={() => toggleDesktopSidebar(false)} />
+        </div>
+      </motion.aside>
 
-      {/* Mobile drawer */}
-      {drawerOpen ? (
+      {/* Reopen control when the desktop sidebar is tucked away. */}
+      {!desktopSidebar ? (
+        <button
+          type="button"
+          onClick={() => toggleDesktopSidebar(true)}
+          className="btn btn-ghost fixed left-3 top-3 z-40 hidden size-10 !px-0 lg:inline-flex"
+          aria-label="Open sidebar"
+          title="Open sidebar"
+        >
+          <Menu className="size-4" />
+        </button>
+      ) : null}
+
+      {/* Mobile drawer — animates both directions; 'closing' unmounts on a timer. */}
+      {drawer !== "closed" ? (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div
+          <motion.div
             className="absolute inset-0 bg-black/55 backdrop-blur-sm"
-            onClick={() => setDrawerOpen(false)}
+            onClick={closeDrawer}
             aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: drawer === "open" ? 1 : 0 }}
+            transition={{ duration: 0.22 }}
           />
           <motion.div
             className="absolute inset-y-0 left-0 w-[19rem] max-w-[85vw] border-r border-line shadow-2xl"
             initial={{ x: reduceMotion ? 0 : "-100%" }}
-            animate={{ x: 0 }}
-            transition={{ type: "spring", stiffness: 420, damping: 36 }}
+            animate={{ x: drawer === "open" ? 0 : "-100%" }}
+            transition={{ type: "spring", stiffness: 420, damping: 38 }}
           >
-            {sidebar}
+            <Sidebar {...sidebarProps} onClose={closeDrawer} />
           </motion.div>
         </div>
       ) : null}
@@ -206,7 +248,7 @@ export default function PortfolioLayout({
         <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-bg/80 px-5 py-3 backdrop-blur-xl lg:hidden">
           <button
             type="button"
-            onClick={() => setDrawerOpen(true)}
+            onClick={() => setDrawer("open")}
             className="btn btn-ghost size-9 !px-0"
             aria-label="Open menu"
           >

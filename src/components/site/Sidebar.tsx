@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LayoutGrid, X } from "lucide-react";
+import { ChevronsLeft, LayoutGrid, X } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
 import PixelSprite from "@/components/PixelSprite";
 import ThemeToggle from "./ThemeToggle";
 import type { SidebarCategory } from "@/lib/queries";
 
 export const ALL_CATEGORIES = "All Projects";
+
+/** How long the entry wave lasts: 4 frames at 4fps, plus a beat on the held
+    final pose before the talk loop takes over. */
+const WAVE_MS = 4 * 250 + 500;
 
 export default function Sidebar({
   siteTitle,
@@ -18,6 +22,7 @@ export default function Sidebar({
   selected,
   onSelect,
   onClose,
+  onCollapse,
 }: {
   siteTitle: string;
   subtitle: string;
@@ -27,11 +32,18 @@ export default function Sidebar({
   selected: string;
   onSelect: (name: string) => void;
   onClose?: () => void;
+  /** Desktop collapse control; rendering is lg-only. */
+  onCollapse?: () => void;
 }) {
-  // Wave hello on mount, then settle into the talking loop.
+  // Entry greeting: the wave plays exactly once (one-shot, held on the final
+  // raised-hand frame) and only then hands off to the talking loop. Looping it
+  // on a mismatched timer made the two sheets fight mid-cycle.
+  const [wavePlay, setWavePlay] = useState(0);
   const [greeting, setGreeting] = useState(true);
   useEffect(() => {
-    const t = window.setTimeout(() => setGreeting(false), 1700);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- kicks off the one-shot after mount so the client actually sees frame 0 first
+    setWavePlay(1);
+    const t = window.setTimeout(() => setGreeting(false), WAVE_MS);
     return () => window.clearTimeout(t);
   }, []);
 
@@ -40,13 +52,16 @@ export default function Sidebar({
       <div className="flex items-start gap-3.5">
         {/* Animated pixel avatar. The sheet has a transparent background, so
             one asset works in both themes over the soft accent tile. */}
-        <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-accent-soft ring-1 ring-line-strong">
+        <span className="relative grid size-16 shrink-0 place-items-center rounded-2xl bg-accent-soft ring-1 ring-line-strong">
           {greeting ? (
             <PixelSprite
               src="/sprites/chris-wave.png"
               frames={4}
               size={60}
               fps={4}
+              mode="once"
+              playKey={wavePlay}
+              restFrame={0}
               alt={siteTitle}
             />
           ) : (
@@ -58,6 +73,11 @@ export default function Sidebar({
               alt={siteTitle}
             />
           )}
+          {greeting ? (
+            <span aria-hidden className="pixel-bubble absolute -right-3 -top-2 z-10">
+              HI!
+            </span>
+          ) : null}
         </span>
 
         <div className="min-w-0 flex-1">
@@ -75,6 +95,17 @@ export default function Sidebar({
             aria-label="Close menu"
           >
             <X className="size-4" />
+          </button>
+        ) : null}
+        {onCollapse ? (
+          <button
+            type="button"
+            onClick={onCollapse}
+            className="btn btn-ghost hidden size-9 shrink-0 !px-0 lg:inline-flex"
+            aria-label="Collapse sidebar"
+            title="Collapse sidebar"
+          >
+            <ChevronsLeft className="size-4" />
           </button>
         ) : null}
       </div>

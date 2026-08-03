@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import { MessageCircle, X } from "lucide-react";
 import PixelSprite from "@/components/PixelSprite";
 
@@ -21,7 +22,16 @@ export default function ContactWidget({
   linkedIn: string;
 }) {
   const [open, setOpen] = useState(false);
+  // Counts opens so the star burst replays each time.
+  const [openCount, setOpenCount] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  function toggle() {
+    setOpen((v) => {
+      if (!v) setOpenCount((c) => c + 1);
+      return !v;
+    });
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -46,9 +56,12 @@ export default function ContactWidget({
   return (
     <div ref={wrapRef} className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3">
       {open ? (
-        <div
+        <motion.div
           id="contact-options"
           className="glass w-60 origin-bottom-right rounded-2xl p-2 shadow-2xl"
+          initial={{ opacity: 0, scale: 0.5, y: 14 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 420, damping: 24 }}
         >
           <p className="eyebrow px-2 pb-1 pt-2 text-faint">Get in touch</p>
           {email ? (
@@ -81,12 +94,33 @@ export default function ContactWidget({
               </span>
             </a>
           ) : null}
-        </div>
+        </motion.div>
+      ) : null}
+
+      {/* Star burst fired from the button on each open. */}
+      {open ? (
+        <span aria-hidden className="pointer-events-none absolute bottom-4 right-4">
+          {[
+            { x: -46, y: -30, delay: 0 },
+            { x: -18, y: -52, delay: 0.05 },
+            { x: 16, y: -34, delay: 0.1 },
+          ].map((b, i) => (
+            <motion.span
+              key={`${openCount}-${i}`}
+              className="absolute"
+              initial={{ opacity: 1, x: 0, y: 0, scale: 0.4 }}
+              animate={{ opacity: 0, x: b.x, y: b.y, scale: 1.1 }}
+              transition={{ duration: 0.7, delay: b.delay, ease: "easeOut" }}
+            >
+              <PixelSprite src="/sprites/star-twinkle.png" frames={6} size={18} fps={10} />
+            </motion.span>
+          ))}
+        </span>
       ) : null}
 
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         aria-expanded={open}
         aria-controls="contact-options"
         className="btn btn-primary h-12 rounded-full !px-5 shadow-xl"
