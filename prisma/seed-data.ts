@@ -18,12 +18,12 @@ export type SeedProject = {
 
 /** Sidebar collections, in display order. `icon` is a lucide export name. */
 export const CATEGORIES: { name: string; icon: string }[] = [
-  { name: "Web Development", icon: "Code2" },
-  { name: "Mobile", icon: "Smartphone" },
-  { name: "Data & Analytics", icon: "BarChart3" },
-  { name: "AI & Machine Learning", icon: "Cpu" },
-  { name: "Design", icon: "Shapes" },
-  { name: "Other", icon: "Boxes" },
+  { name: "Web Development", icon: "pixel:webdev" },
+  { name: "Mobile", icon: "pixel:mobile" },
+  { name: "Data & Analytics", icon: "pixel:data" },
+  { name: "AI & Machine Learning", icon: "pixel:ai" },
+  { name: "Design", icon: "pixel:design" },
+  { name: "Other", icon: "pixel:other" },
 ];
 
 export const TAGS = [

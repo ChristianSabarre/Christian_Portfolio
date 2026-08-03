@@ -5,7 +5,7 @@ import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import SubmitButton from "./SubmitButton";
 import ConfirmSubmit from "./ConfirmSubmit";
 import ProjectIcon from "@/components/ProjectIcon";
-import { ICON_NAMES } from "@/lib/icons";
+import { ALL_ICON_IDS } from "@/lib/pixelIcons";
 import { deleteTaxonomyAction, saveTaxonomyAction, type ActionState } from "@/app/admin/actions";
 
 export type TaxonomyItem = {
@@ -176,7 +176,7 @@ function IconPicker({ value, onChange }: { value: string; onChange: (name: strin
     <div className="w-full">
       <p className="label mb-1.5">Sidebar icon</p>
       <div className="grid max-h-28 grid-cols-10 gap-1.5 overflow-y-auto rounded-xl border border-line p-2">
-        {ICON_NAMES.map((name) => {
+        {ALL_ICON_IDS.map((name) => {
           const on = value === name;
           return (
             <button

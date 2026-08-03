@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Mail, MessageCircle, X } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
+import PixelSprite from "@/components/PixelSprite";
 
 /** lucide 1.x dropped brand marks, so the LinkedIn glyph is inlined. */
 function LinkedInMark({ className }: { className?: string }) {
@@ -56,7 +57,7 @@ export default function ContactWidget({
               className="flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm transition-colors hover:bg-surface-hover"
             >
               <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
-                <Mail className="size-4" />
+                <PixelSprite src="/sprites/envelope.png" frames={4} size={20} fps={3} />
               </span>
               <span className="min-w-0">
                 <span className="block font-medium">Email</span>

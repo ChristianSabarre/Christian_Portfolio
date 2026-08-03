@@ -310,7 +310,7 @@ export default function PortfolioLayout({
 
             {visible.length === 0 ? (
               <div className="glass flex flex-col items-center gap-3 rounded-[--radius-card] px-6 py-20 text-center">
-                <PixelSprite src="/sprites/chris-idle.png" frames={4} size={96} fps={1.4} />
+                <PixelSprite src="/sprites/chris-shrug.png" frames={2} size={110} fps={1} />
                 <p className="font-display text-lg font-semibold">
                   No projects match those filters
                 </p>

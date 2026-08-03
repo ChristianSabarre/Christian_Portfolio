@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Silkscreen } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({
+// Pixel display face. Not a variable font, so weights are pinned.
+const display = Silkscreen({
+  weight: ["400", "700"],
   variable: "--font-display",
   subsets: ["latin"],
   display: "swap",

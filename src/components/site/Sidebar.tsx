@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { LayoutGrid, X } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
 import PixelSprite from "@/components/PixelSprite";
@@ -27,19 +28,36 @@ export default function Sidebar({
   onSelect: (name: string) => void;
   onClose?: () => void;
 }) {
+  // Wave hello on mount, then settle into the talking loop.
+  const [greeting, setGreeting] = useState(true);
+  useEffect(() => {
+    const t = window.setTimeout(() => setGreeting(false), 1700);
+    return () => window.clearTimeout(t);
+  }, []);
+
   return (
     <div className="flex h-full flex-col gap-7 overflow-y-auto bg-bg-deep px-5 py-6">
       <div className="flex items-start gap-3.5">
         {/* Animated pixel avatar. The sheet has a transparent background, so
             one asset works in both themes over the soft accent tile. */}
         <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-accent-soft ring-1 ring-line-strong">
-          <PixelSprite
-            src="/sprites/chris-talk.png"
-            frames={6}
-            size={60}
-            fps={5}
-            alt={siteTitle}
-          />
+          {greeting ? (
+            <PixelSprite
+              src="/sprites/chris-wave.png"
+              frames={4}
+              size={60}
+              fps={4}
+              alt={siteTitle}
+            />
+          ) : (
+            <PixelSprite
+              src="/sprites/chris-talk.png"
+              frames={6}
+              size={60}
+              fps={5}
+              alt={siteTitle}
+            />
+          )}
         </span>
 
         <div className="min-w-0 flex-1">
@@ -122,7 +140,7 @@ function SidebarItem({
     >
       <span className={selected ? "text-accent" : "text-faint"}>
         {icon ? (
-          <ProjectIcon name={icon} className="size-[1.05rem]" />
+          <ProjectIcon name={icon} className="size-[18px]" />
         ) : (
           <LayoutGrid className="size-[1.05rem]" />
         )}

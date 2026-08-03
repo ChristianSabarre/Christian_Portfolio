@@ -2,7 +2,7 @@
 
 import { useRef, type MouseEvent, type PointerEvent } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { ArrowUpRight, Eye, Play } from "lucide-react";
+import { ArrowUpRight, Eye } from "lucide-react";
 import PixelSprite from "@/components/PixelSprite";
 import ProjectIcon from "@/components/ProjectIcon";
 import UpvoteButton from "./UpvoteButton";
@@ -105,7 +105,8 @@ export default function ProjectCard({
             className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-sm"
             title="Includes a video"
           >
-            <Play className="size-2.5 fill-current" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- tiny local pixel art */}
+            <img src="/sprites/icons/play.png" alt="" className="size-3" style={{ imageRendering: "pixelated" }} />
             Video
           </span>
         ) : null}

@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
-import { ICON_NAMES } from "@/lib/icons";
+import { ALL_ICON_IDS } from "@/lib/pixelIcons";
 import { youTubeId } from "@/lib/youtube";
 import ProjectIcon from "@/components/ProjectIcon";
 import ImageDropzone from "./ImageDropzone";
@@ -308,7 +308,7 @@ export default function ProjectForm({
           <legend className="label">Icon</legend>
           <input type="hidden" name="icon" value={icon} />
           <div className="grid max-h-52 grid-cols-6 gap-2 overflow-y-auto rounded-xl border border-line p-2 sm:grid-cols-10">
-            {ICON_NAMES.map((name) => {
+            {ALL_ICON_IDS.map((name) => {
               const on = icon === name;
               return (
                 <button

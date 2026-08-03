@@ -382,3 +382,73 @@
   image-rendering: pixelated;
   background-repeat: no-repeat;
 }
+
+/* ============================= Pixel skin =============================
+   Unlayered on purpose — this whole block must beat Tailwind utilities.
+   Hard edges everywhere: pixel art has no anti-aliased corners. */
+* {
+  border-radius: 0 !important;
+}
+
+/* Chunky game-button treatment. Overrides the soft component styles above. */
+.btn {
+  font-family: var(--font-display), monospace;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  border: 2px solid color-mix(in oklab, var(--text) 28%, transparent);
+  box-shadow: 3px 3px 0 0 color-mix(in oklab, var(--text) 22%, transparent);
+}
+.btn:hover {
+  translate: -1px -1px;
+  box-shadow: 4px 4px 0 0 color-mix(in oklab, var(--text) 26%, transparent);
+}
+.btn:active {
+  transform: none;
+  translate: 2px 2px;
+  box-shadow: 1px 1px 0 0 color-mix(in oklab, var(--text) 22%, transparent);
+}
+.btn-primary {
+  border-color: color-mix(in oklab, var(--accent) 55%, black);
+}
+
+.chip {
+  border-width: 2px;
+  font-family: var(--font-display), monospace;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  font-family: var(--font-display), monospace;
+  letter-spacing: 0.12em;
+}
+
+.glass {
+  box-shadow: 5px 5px 0 0 color-mix(in oklab, var(--text) 10%, transparent);
+}
+
+/* Faint CRT scanlines over everything, both themes. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    color-mix(in oklab, var(--text) 5%, transparent) 2px 3px
+  );
+  opacity: 0.35;
+}
+
+/* Hand-drawn pixel arrow as the native cursor. Text fields keep the I-beam. */
+body,
+a,
+button,
+select,
+label,
+[role="button"] {
+  cursor: url("/sprites/cursor.png") 5 3, auto;
+}
