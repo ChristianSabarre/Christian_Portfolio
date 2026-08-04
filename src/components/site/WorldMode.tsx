@@ -221,7 +221,15 @@ export default function WorldMode({
             {moving ? (
               <PixelSprite src="/sprites/chris-run.png" frames={5} size={PLAYER_SIZE} fps={12} />
             ) : (
-              <PixelSprite src="/sprites/chris-talk.png" frames={6} size={PLAYER_SIZE} fps={3} />
+              /* Standing still = the upright middle frame of the run cycle, so
+                 the body never swaps for the talking bust mid-street. */
+              <PixelSprite
+                src="/sprites/chris-run.png"
+                frames={5}
+                size={PLAYER_SIZE}
+                mode="once"
+                restFrame={2}
+              />
             )}
           </span>
         </div>
