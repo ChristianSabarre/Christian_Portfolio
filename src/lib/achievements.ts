@@ -23,6 +23,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "taxonomist", title: "TAXONOMIST", description: "Filtered by collection" },
   { id: "lights", title: "LIGHT SWITCH", description: "Toggled the theme" },
   { id: "networker", title: "NETWORKER", description: "Opened the contact panel" },
+  { id: "pathfinder", title: "PATHFINDER", description: "Explored the world" },
 ];
 
 export const ACHIEVEMENT_EVENT = "portfolio:achievement";
@@ -88,5 +89,8 @@ export const track = {
   },
   contact() {
     unlock("networker");
+  },
+  world() {
+    unlock("pathfinder");
   },
 };

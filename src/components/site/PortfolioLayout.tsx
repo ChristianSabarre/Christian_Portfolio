@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { LayoutGrid, List, Menu, Search, X } from "lucide-react";
+import { Gamepad2, LayoutGrid, List, Menu, Search, X } from "lucide-react";
 import Sidebar, { ALL_CATEGORIES } from "./Sidebar";
 import AchievementToasts from "./AchievementToasts";
+import WorldMode from "./WorldMode";
 import PixelSprite from "@/components/PixelSprite";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
@@ -19,7 +20,7 @@ import { track } from "@/lib/achievements";
 import type { LinkCardRow, PublicProject, SidebarCategory, SiteSettings } from "@/lib/queries";
 
 type SortKey = "featured" | "az" | "za" | "votes";
-type ViewMode = "grid" | "list";
+type ViewMode = "grid" | "list" | "world";
 
 const SORTS: { value: SortKey; label: string }[] = [
   { value: "featured", label: "Featured first" },
@@ -80,7 +81,7 @@ export default function PortfolioLayout({
     try {
       const saved = localStorage.getItem("portfolio-view");
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time preference restore, see above
-      if (saved === "grid" || saved === "list") setView(saved);
+      if (saved === "grid" || saved === "list" || saved === "world") setView(saved);
        
       if (localStorage.getItem("portfolio-sidebar") === "0") setDesktopSidebar(false);
     } catch {
@@ -104,6 +105,7 @@ export default function PortfolioLayout({
 
   function changeView(next: ViewMode) {
     setView(next);
+    if (next === "world") track.world();
     try {
       localStorage.setItem("portfolio-view", next);
     } catch {
@@ -329,6 +331,7 @@ export default function PortfolioLayout({
                     [
                       { mode: "grid" as const, Icon: LayoutGrid, label: "Grid view" },
                       { mode: "list" as const, Icon: List, label: "List view" },
+                      { mode: "world" as const, Icon: Gamepad2, label: "World view" },
                     ]
                   ).map(({ mode, Icon, label }) => (
                     <button
@@ -355,7 +358,9 @@ export default function PortfolioLayout({
               </div>
             </div>
 
-            {visible.length === 0 ? (
+            {view === "world" ? (
+              <WorldMode projects={visible} onView={openModal} paused={active !== null} />
+            ) : visible.length === 0 ? (
               <div className="glass flex flex-col items-center gap-3 rounded-[--radius-card] px-6 py-20 text-center">
                 <PixelSprite src="/sprites/chris-shrug.png" frames={2} size={110} fps={1} />
                 <p className="font-display text-lg font-semibold">
