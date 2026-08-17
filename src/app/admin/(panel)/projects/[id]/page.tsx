@@ -17,12 +17,16 @@ export default async function EditProjectPage({
   const projectId = Number(id);
   if (!Number.isInteger(projectId)) notFound();
 
-  const [project, [categories, tags, platforms]] = await Promise.all([
+  const [project, [categories, tags, platforms], articles] = await Promise.all([
     prisma.project.findUnique({
       where: { id: projectId },
       include: { tags: { select: { id: true } } },
     }),
     getTaxonomy(),
+    prisma.article.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true, published: true },
+    }),
   ]);
 
   if (!project) notFound();
@@ -34,9 +38,11 @@ export default async function EditProjectPage({
         categories={categories}
         platforms={platforms}
         tags={tags}
+        articles={articles}
         submitLabel="Save changes"
         values={{
           id: project.id,
+          articleId: project.articleId ?? "",
           title: project.title,
           url: project.url,
           coverImage: project.coverImage,

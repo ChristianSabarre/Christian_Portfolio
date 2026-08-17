@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronsLeft, LayoutGrid, X } from "lucide-react";
+import Link from "next/link";
+import { ChevronsLeft, FileText, LayoutGrid, X } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
 import PixelSprite from "@/components/PixelSprite";
 import ThemeToggle from "./ThemeToggle";
@@ -136,6 +137,15 @@ export default function Sidebar({
           ))}
         </ul>
       </nav>
+
+      <Link
+        href="/articles"
+        className="flex items-center gap-3 border border-line px-3 py-2.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-text"
+      >
+        <FileText className="size-[1.05rem] text-faint" />
+        <span className="flex-1">Articles</span>
+        <span className="eyebrow text-faint">Read</span>
+      </Link>
 
       <div className="mt-auto flex items-center justify-between border-t border-line pt-4">
         <span className="eyebrow text-faint">Theme</span>

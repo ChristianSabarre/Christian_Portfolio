@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { ArrowUpRight, Check, Link as LinkIcon, Link2, X } from "lucide-react";
+import NextLink from "next/link";
+import { ArrowUpRight, BookOpen, Check, Link as LinkIcon, Link2, X } from "lucide-react";
 import ProjectIcon from "@/components/ProjectIcon";
 import UpvoteButton from "./UpvoteButton";
 import { youTubeEmbedUrl } from "@/lib/youtube";
@@ -191,6 +192,22 @@ export default function ProjectModal({
               </span>
             ))}
           </div>
+
+          {project.article ? (
+            <NextLink
+              href={`/articles/${project.article.slug}`}
+              className="flex items-center gap-3 border-2 border-accent/40 bg-accent-soft px-4 py-3 transition-colors hover:bg-accent-soft/70"
+            >
+              <BookOpen className="size-4 shrink-0 text-accent" />
+              <span className="min-w-0 flex-1">
+                <span className="eyebrow block text-accent">Read the article</span>
+                <span className="block truncate text-sm font-semibold">
+                  {project.article.title}
+                </span>
+              </span>
+              <ArrowUpRight className="size-4 shrink-0 text-accent" />
+            </NextLink>
+          ) : null}
 
           <p className="flex items-start gap-2 text-sm">
             <LinkIcon className="mt-0.5 size-4 shrink-0 text-faint" />

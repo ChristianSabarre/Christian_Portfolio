@@ -1,11 +1,18 @@
 import { getTaxonomy } from "@/lib/queries";
+import { prisma } from "@/lib/db";
 import { createProjectAction } from "@/app/admin/actions";
 import ProjectForm from "@/components/admin/ProjectForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewProjectPage() {
-  const [categories, tags, platforms] = await getTaxonomy();
+  const [[categories, tags, platforms], articles] = await Promise.all([
+    getTaxonomy(),
+    prisma.article.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true, published: true },
+    }),
+  ]);
 
   return (
     <ProjectForm
@@ -13,8 +20,10 @@ export default async function NewProjectPage() {
       categories={categories}
       platforms={platforms}
       tags={tags}
+      articles={articles}
       submitLabel="Create project"
       values={{
+        articleId: "",
         title: "",
         url: "",
         coverImage: "",

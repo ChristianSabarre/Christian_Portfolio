@@ -64,6 +64,11 @@ model Project {
   tags       Tag[]
   votes      Vote[]
 
+  /// Optional write-up. Attached at the admin's discretion; deleting the
+  /// article detaches it rather than deleting the project.
+  articleId Int?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -95,6 +100,32 @@ model Vote {
 /// service or credential. Uploads are resized and re-encoded in the browser
 /// first, so rows stay small; the serve route sets immutable cache headers so
 /// the CDN, not this table, handles repeat traffic.
+/// A long-form write-up. The body is an ordered list of typed blocks
+/// (heading / paragraph / image / quote / code) stored as JSON, so photos sit
+/// inline with the prose rather than in a separate gallery.
+model Article {
+  id       Int    @id @default(autoincrement())
+  title    String
+  slug     String @unique
+  subtitle String @default("")
+  /// Shown on cards and as the header image on the article itself.
+  coverImage String @default("")
+  /// ArticleBlock[] — see src/lib/articleBlocks.ts for the shape and parser.
+  blocks   Json   @default("[]")
+  /// Closing note under the body, e.g. a credit or call to action.
+  footer   String @default("")
+
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+
+  projects Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, publishedAt])
+}
+
 model Asset {
   id          Int      @id @default(autoincrement())
   data        Bytes

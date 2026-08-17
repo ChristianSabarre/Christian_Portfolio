@@ -9,7 +9,9 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { SESSION_COOKIE, createSessionToken, sessionCookieOptions } from "@/lib/auth";
 import { slugify, uniqueSlug } from "@/lib/slug";
+import { articleBlocksSchema } from "@/lib/articleBlocks";
 import {
+  articleSchema,
   fieldErrors,
   linkCardSchema,
   projectSchema,
@@ -107,6 +109,7 @@ function projectFormValues(formData: FormData) {
     featured: checkbox(formData, "featured"),
     published: checkbox(formData, "published"),
     order: formData.get("order") || 0,
+    articleId: formData.get("articleId") || "",
   };
 }
 
@@ -151,6 +154,7 @@ export async function createProjectAction(
         order: data.order,
         categoryId: data.categoryId,
         platformId: data.platformId,
+        articleId: data.articleId,
         tags: { connect: data.tagIds.map((id) => ({ id })) },
       },
     });
@@ -206,6 +210,7 @@ export async function updateProjectAction(
         order: data.order,
         categoryId: data.categoryId,
         platformId: data.platformId,
+        articleId: data.articleId,
         tags: { set: data.tagIds.map((tagId) => ({ id: tagId })) },
       },
     });
@@ -399,4 +404,115 @@ export async function saveSiteSettingsAction(
 
   revalidateAll();
   return { ok: true, message: "Saved." };
+}
+
+// -------------------------------------------------------------- articles
+
+/**
+ * Blocks arrive as a single JSON field rather than dozens of indexed inputs:
+ * the editor owns the ordering, and one payload keeps add/remove/reorder
+ * atomic. It is parsed and re-validated here, never trusted.
+ */
+function parseBlocksField(formData: FormData) {
+  const raw = String(formData.get("blocks") ?? "[]");
+  let decoded: unknown;
+  try {
+    decoded = JSON.parse(raw);
+  } catch {
+    return { ok: false as const, message: "The article body could not be read." };
+  }
+  const parsed = articleBlocksSchema.safeParse(decoded);
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    const where = first?.path?.[0] !== undefined ? ` (block ${Number(first.path[0]) + 1})` : "";
+    return { ok: false as const, message: `${first?.message ?? "Invalid block"}${where}` };
+  }
+  return { ok: true as const, blocks: parsed.data };
+}
+
+export async function saveArticleAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireAdmin();
+
+  const parsed = articleSchema.safeParse({
+    title: formData.get("title"),
+    subtitle: formData.get("subtitle") ?? "",
+    coverImage: formData.get("coverImage") ?? "",
+    footer: formData.get("footer") ?? "",
+    published: checkbox(formData, "published"),
+  });
+  if (!parsed.success) {
+    return { ok: false, message: "Please fix the highlighted fields.", errors: fieldErrors(parsed.error) };
+  }
+
+  const body = parseBlocksField(formData);
+  if (!body.ok) return { ok: false, message: body.message };
+
+  const idRaw = formData.get("id");
+  const id = idRaw ? Number(idRaw) : null;
+  const data = parsed.data;
+
+  if (id) {
+    const existing = await prisma.article.findUnique({
+      where: { id },
+      select: { slug: true, title: true, published: true, publishedAt: true },
+    });
+    if (!existing) return { ok: false, message: "That article no longer exists." };
+
+    // Keep the slug stable unless the title changed, so shared links survive.
+    let slug = existing.slug;
+    if (existing.title !== data.title) {
+      const taken = new Set(
+        (await prisma.article.findMany({ where: { NOT: { id } }, select: { slug: true } })).map(
+          (a) => a.slug,
+        ),
+      );
+      slug = uniqueSlug(data.title, taken);
+    }
+
+    await prisma.article.update({
+      where: { id },
+      data: {
+        ...data,
+        slug,
+        blocks: body.blocks,
+        // Stamp the publish date the first time it goes live, then leave it.
+        publishedAt:
+          data.published && !existing.publishedAt ? new Date() : existing.publishedAt,
+      },
+    });
+    revalidateAll();
+    revalidatePath(`/articles/${slug}`);
+    revalidatePath("/articles");
+    return { ok: true, message: "Saved." };
+  }
+
+  const taken = new Set((await prisma.article.findMany({ select: { slug: true } })).map((a) => a.slug));
+  const created = await prisma.article.create({
+    data: {
+      ...data,
+      slug: uniqueSlug(data.title, taken),
+      blocks: body.blocks,
+      publishedAt: data.published ? new Date() : null,
+    },
+    select: { id: true },
+  });
+
+  revalidateAll();
+  revalidatePath("/articles");
+  redirect(`/admin/articles/${created.id}?created=1`);
+}
+
+export async function deleteArticleAction(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (Number.isInteger(id) && id > 0) {
+    // Projects pointing at it are detached by the schema's SetNull rule.
+    await prisma.article.delete({ where: { id } });
+    revalidateAll();
+    revalidatePath("/articles");
+  }
+  redirect("/admin/articles?deleted=1");
 }

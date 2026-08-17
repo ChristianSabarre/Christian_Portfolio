@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { excerptFrom, parseBlocks, readingMinutes, type ArticleBlock } from "@/lib/articleBlocks";
 
 /** Shape handed to the client bundle — flat and JSON-serialisable. */
 export type PublicProject = {
@@ -16,6 +17,7 @@ export type PublicProject = {
   platform: string;
   tags: string[];
   votes: number;
+  article: { slug: string; title: string } | null;
 };
 
 export async function getPublicProjects(): Promise<PublicProject[]> {
@@ -27,6 +29,7 @@ export async function getPublicProjects(): Promise<PublicProject[]> {
       platform: { select: { name: true } },
       tags: { select: { name: true }, orderBy: { name: "asc" } },
       _count: { select: { votes: true } },
+      article: { select: { slug: true, title: true, published: true } },
     },
   });
 
@@ -45,6 +48,11 @@ export async function getPublicProjects(): Promise<PublicProject[]> {
     platform: p.platform.name,
     tags: p.tags.map((t) => t.name),
     votes: p._count.votes,
+    // Only surface the link once the article itself is published.
+    article:
+      p.article && p.article.published
+        ? { slug: p.article.slug, title: p.article.title }
+        : null,
   }));
 }
 
@@ -85,4 +93,77 @@ export function getTaxonomy() {
     prisma.tag.findMany({ orderBy: { name: "asc" } }),
     prisma.platform.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
   ]);
+}
+
+export type ArticleCard = {
+  slug: string;
+  title: string;
+  subtitle: string;
+  coverImage: string;
+  excerpt: string;
+  minutes: number;
+  publishedAt: Date | null;
+  projects: { title: string; slug: string }[];
+};
+
+export async function getPublishedArticles(): Promise<ArticleCard[]> {
+  const rows = await prisma.article.findMany({
+    where: { published: true },
+    orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
+    include: { projects: { select: { title: true, slug: true }, where: { published: true } } },
+  });
+
+  return rows.map((a) => {
+    const blocks = parseBlocks(a.blocks);
+    return {
+      slug: a.slug,
+      title: a.title,
+      subtitle: a.subtitle,
+      coverImage: a.coverImage,
+      excerpt: a.subtitle || excerptFrom(blocks),
+      minutes: readingMinutes(blocks),
+      publishedAt: a.publishedAt,
+      projects: a.projects,
+    };
+  });
+}
+
+export type ArticleDetail = {
+  slug: string;
+  title: string;
+  subtitle: string;
+  coverImage: string;
+  footer: string;
+  blocks: ArticleBlock[];
+  minutes: number;
+  publishedAt: Date | null;
+  projects: { title: string; slug: string; url: string }[];
+};
+
+export async function getArticleBySlug(slug: string): Promise<ArticleDetail | null> {
+  const article = await prisma.article.findFirst({
+    where: { slug, published: true },
+    include: {
+      projects: { select: { title: true, slug: true, url: true }, where: { published: true } },
+    },
+  });
+  if (!article) return null;
+
+  const blocks = parseBlocks(article.blocks);
+  return {
+    slug: article.slug,
+    title: article.title,
+    subtitle: article.subtitle,
+    coverImage: article.coverImage,
+    footer: article.footer,
+    blocks,
+    minutes: readingMinutes(blocks),
+    publishedAt: article.publishedAt,
+    projects: article.projects,
+  };
+}
+
+/** Slugs for generateStaticParams-style needs and admin duplicate checks. */
+export function getAllArticleSlugs() {
+  return prisma.article.findMany({ select: { slug: true } });
 }

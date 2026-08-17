@@ -12,8 +12,11 @@ import type { ActionState } from "@/app/admin/actions";
 
 type Option = { id: number; name: string };
 
+export type ArticleOption = { id: number; title: string; published: boolean };
+
 export type ProjectFormValues = {
   id?: number;
+  articleId: number | "";
   title: string;
   url: string;
   coverImage: string;
@@ -37,6 +40,7 @@ export default function ProjectForm({
   categories,
   platforms,
   tags,
+  articles,
   submitLabel,
 }: {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
@@ -44,6 +48,7 @@ export default function ProjectForm({
   categories: Option[];
   platforms: Option[];
   tags: Option[];
+  articles: ArticleOption[];
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialState);
@@ -224,6 +229,30 @@ export default function ProjectForm({
               />
             </div>
           ) : null}
+        </div>
+
+        <div>
+          <label htmlFor="articleId" className="label">
+            Article <span className="font-normal text-faint">(optional)</span>
+          </label>
+          <select
+            id="articleId"
+            name="articleId"
+            defaultValue={values.articleId === "" ? "" : String(values.articleId)}
+            className="field cursor-pointer"
+          >
+            <option value="">No article</option>
+            {articles.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.title}
+                {a.published ? "" : " (draft — link stays hidden)"}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-faint">
+            Adds a &ldquo;Read the article&rdquo; link in this project&rsquo;s dialog. Drafts stay
+            hidden until published.
+          </p>
         </div>
       </section>
 
