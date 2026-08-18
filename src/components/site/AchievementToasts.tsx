@@ -10,6 +10,10 @@ const SHOW_MS = 4200;
 /**
  * Game-style "ACHIEVEMENT UNLOCKED" toasts, shown one at a time from a queue so
  * simultaneous unlocks read as a satisfying little parade rather than a pile.
+ *
+ * pointer-events-none is load-bearing: the toast overlaps the sticky view-mode
+ * controls in the top-right, and without it an unlock would silently swallow
+ * clicks on them for its whole four seconds.
  * Mount once on the public layout; unlock events arrive via a CustomEvent.
  */
 export default function AchievementToasts() {
@@ -54,7 +58,7 @@ export default function AchievementToasts() {
   return (
     <motion.div
       role="status"
-      className="fixed right-4 top-4 z-[75] flex items-center gap-3 border-2 border-gold bg-bg-raised px-4 py-3"
+      className="pointer-events-none fixed right-4 top-20 z-[75] flex items-center gap-3 border-2 border-gold bg-bg-raised px-4 py-3"
       style={{ boxShadow: "4px 4px 0 0 color-mix(in oklab, var(--gold) 45%, transparent)" }}
       initial={{ opacity: 0, y: -28, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
