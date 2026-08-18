@@ -8,6 +8,7 @@
  *    injected and moved in step with page.mouse.
  *  - Everything is paced with explicit waits; the goal is a legible tour.
  */
+/* eslint-disable @typescript-eslint/no-require-imports -- plain-node tooling script, not app code */
 const { chromium } = require("playwright");
 const fs = require("fs");
 const path = require("path");
